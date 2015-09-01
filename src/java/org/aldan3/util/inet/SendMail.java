@@ -81,13 +81,20 @@ public class SendMail {
 	public final static String PROP_PASSWORD = "MAILPASSWORD";
 
 	/**
+	 * Additional oAuth2 token for stronger authentication
+	 */
+	public  static final String PROP_OAUTH2_TOKEN = "OAUTH2_TOKEN";
+
+	/**
 	 * Using secure layer flag
 	 */
 	public final static String PROP_SECURE = "MAILSECURELAYER";
 
+
 	protected Properties properties;
 
 	protected static final SimpleDateFormat PROTOCOL_GMTDATE = new SimpleDateFormat("EEE, dd-MMM-yyyy HH:mm:ss 'GMT'");
+
 	static {
 		TimeZone tz = TimeZone.getTimeZone("GMT");
 		tz.setID("GMT");
@@ -216,6 +223,8 @@ public class SendMail {
 			if (s.getResult() != 250)
 				throw new IOException("At presenting POP account " + popAccount + ", a mail server returned code "
 						+ s.lastResult());
+			// TODO analyze for supported auth
+			boolean auth = false;
 			String password = properties.getProperty(PROP_PASSWORD);
 			if (password != null && password.length() > 0) {
 				s.writeLine("AUTH PLAIN");
@@ -230,12 +239,24 @@ public class SendMail {
 				System.arraycopy(passwdBytes, 0, credentialBytes, acntBytes.length + 2, passwdBytes.length);
 				s.writeLine(Base64Codecs.base64Encode(credentialBytes));
 				s.flush();
-				if (s.getResult() != 235)
-					throw new IOException("At credentials check of " + popAccount + ", a mail server returned code "
-							+ s.lastResult());
-				// 535 5.7.1 Credentials Rejected 12sm5390241nzn
+				if (s.getResult() == 334)
+					s.writeLine("");
+				auth = true;
+			} else {
+				// https://developers.google.com/api-client-library/java/google-api-java-client/oauth2
+				String oauthToken = properties.getProperty(PROP_OAUTH2_TOKEN);
+				if (oauthToken != null && oauthToken.length() > 0) {
+					String authToken = "user="+popAccount+'\001'+"auth=Bearer "+oauthToken+"\001\001"; 
+					s.write("AUTH XOAUTH2 ");
+					s.writeLine(Base64Codecs.base64Encode(authToken.getBytes()));
+					s.flush();
+					auth = true;
+				}
 			}
-
+			if (auth && s.getResult() != 235)
+				throw new IOException("At credentials check of " + popAccount + ", a mail server returned code "
+						+ s.lastResult());
+			// 535 5.7.1 Credentials Rejected 12sm5390241nzn
 			s.write("MAIL FROM:<");
 			// TODO: check that args[2] is correct domain name
 			// s.write(escapeSpecials(_mailFrom));
