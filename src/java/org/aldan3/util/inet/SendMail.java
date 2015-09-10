@@ -244,6 +244,8 @@ public class SendMail {
 				auth = true;
 			} else {
 				// https://developers.google.com/api-client-library/java/google-api-java-client/oauth2
+				// https://developers.google.com/android/guides/http-auth
+				// http://android-developers.blogspot.com/2012/09/google-play-services-and-oauth-identity.html	
 				String oauthToken = properties.getProperty(PROP_OAUTH2_TOKEN);
 				if (oauthToken != null && oauthToken.length() > 0) {
 					String authToken = "user="+popAccount+'\001'+"auth=Bearer "+oauthToken+"\001\001"; 
