@@ -427,9 +427,15 @@ public class widget {
 		Class type = val == null ? null : val.getClass();
 		if (v != null && type != null) {
 			if (type.isArray()) {
+				String norm = type.getComponentType() != v.getClass()?v.toString():null;
+				// TODO give a warning that String conv is used
+				//System.err.printf("COmp %s, %s, -> %s%n",  type.getComponentType(),  v.getClass(), norm);
 				if (val instanceof Object[])
 					for (Object e : (Object[]) val) {
-						if (v.equals(e)) {
+						if (norm != null) {
+							if (norm.equals(e.toString()))
+								return true;
+						} else if (v.equals(e)) {
 							return true;
 						}
 					}
