@@ -406,7 +406,7 @@ public class widget {
 			Object val, boolean radio) {
 		Object v = o.meanFieldFilter(vn) ? o.get(vn) : o.get(ln);
 		boolean match = checkMatch(v, val);
-		return html.append("<input name=\"").append(name).append("\" type=\"").append(radio ? "radio" : "checkbox")
+		return html.append("<input name=\"").append(name).append("\" id=\"").append(name).append("\" type=\"").append(radio ? "radio" : "checkbox")
 				.append("\" value=\"").append(v == null ? "" : HttpUtils.htmlEncode(v.toString()))
 				.append(match ? "\" checked>" : "\">")
 				.append(o.get(ln) == null ? "" : HttpUtils.htmlEncode(o.get(ln).toString()));

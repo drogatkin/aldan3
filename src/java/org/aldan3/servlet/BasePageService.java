@@ -191,8 +191,14 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				Object controlData = applySideEffects(doControl());
 				if (controlData == null) { // the form is Ok
 					redirect(req, resp, getSubmitPage());
-				} else
-					w = processView(controlData, getViewName(), false);
+				} else {// TODO getErrorView() can be here too
+					if (noTemplate() && controlData instanceof Map == false) {
+						setContentType("", null);
+						w = resp.getWriter();
+						w.write(controlData.toString());
+					} else
+						w = processView(controlData, getViewName(), false);
+				}
 				return;
 			}
 			w = processView(applySideEffects(getModel()), getViewName(), false);
@@ -275,6 +281,14 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		}
 		return modelData;
 	}
+	
+	/** this method allows to bypass a mechanism of applying a template in case of returning an error
+	 * 
+	 * @return true, if return raw model as result
+	 */
+	protected boolean noTemplate() {
+		return false;
+	}
 
 	/**
 	 * This method generates page content.
@@ -290,6 +304,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			ServletException {
 		if (modelData == null)
 			return null;
+		if(viewName == null)
+			throw new NullPointerException("View name is null");
 		// TODO provide a canvas way for ajax calls
 		String canvas = ajaxView ? null : getCanvasView();
 		if (canvas != null && included == false) {
@@ -326,8 +342,9 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				TemplateEngine.CurrentRequest.setRequest(null);
 			}
 		} else {
-			// no template
+			// no template			
 			if (viewName.startsWith("/") == false)
+
 				log("[%s] Dispatched to include view name %s doesn't lead with '/', it can issue looping in a service of the request.",
 						null, Log.WARNING, viewName);
 			RequestDispatcher rd = req.getRequestDispatcher(viewName);
@@ -1253,7 +1270,11 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 
 	protected void log(String message, Throwable t, Object... details) {
 		if (details != null && details.length > 0)
-			message = String.format(message, details);
+			try {
+				message = String.format(message, details);
+			} catch (Exception e) {
+				message = "The message " + message + " couldn't be formatted properly, 'cause " + e;
+			}
 		frontController.log(message, t);
 	}
 
