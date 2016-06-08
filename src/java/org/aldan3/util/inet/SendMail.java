@@ -79,6 +79,11 @@ public class SendMail {
 	 * SMTP server password
 	 */
 	public final static String PROP_PASSWORD = "MAILPASSWORD";
+	
+	/** host name or IP of e-mail sender
+	 * 
+	 */
+	public final static String PROP_MAILSEND_HOST = "MAILSENDHOST";
 
 	/**
 	 * Additional oAuth2 token for stronger authentication
@@ -203,6 +208,13 @@ public class SendMail {
 			mailPort = Integer.parseInt(properties.getProperty(PROP_MAILPORT, "" + DEF_MAILPORT));
 		} catch (Exception e) {
 		}
+		
+		String sendHost = properties.getProperty(PROP_MAILSEND_HOST);
+		if (sendHost == null) {
+			// TODO calculate from own InetAddress
+			sendHost = "localhost";
+		}
+		
 		String popAccount = properties.getProperty(PROP_POPACCNT, "Unknown");
 		TextSocket s = null;
 		try {
@@ -217,7 +229,8 @@ public class SendMail {
 			s.getResult();
 
 			s.write("HELO ");
-			s.writeLine(popAccount);
+			//s.writeLine(popAccount);
+			s.writeLine(sendHost);
 			s.flush();
 
 			if (s.getResult() != 250)
@@ -239,9 +252,10 @@ public class SendMail {
 				System.arraycopy(passwdBytes, 0, credentialBytes, acntBytes.length + 2, passwdBytes.length);
 				s.writeLine(Base64Codecs.base64Encode(credentialBytes));
 				s.flush();
-				if (s.getResult() == 334)
+				if (s.getResult() == 334) {
 					s.writeLine("");
-				auth = true;
+					auth = true;
+				}
 			} else {
 				// https://developers.google.com/api-client-library/java/google-api-java-client/oauth2
 				// https://developers.google.com/android/guides/http-auth

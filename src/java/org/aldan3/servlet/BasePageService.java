@@ -741,10 +741,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 * Fills data object from form data
 	 * 
 	 * @param model
-	 * @return
-	 * 
-	 *         Note, use
-	 */
+	 * @return the object with populated values froma request
+	*/
 	public DataObject fillDataObject(DataObject model, Filler filler) {
 		if (model != null) {
 			Set<org.aldan3.model.Field> fields = model.getFields();
@@ -784,6 +782,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				if (ff.validator() != null && ff.validator() != FieldValidator.class)
 					try {
 						validator = ff.validator().newInstance();
+						inject(validator);
 					} catch (InstantiationException e) {
 						log("Can't create validator %s for %s", null, ff.validator(), f.getName());
 					} catch (IllegalAccessException e) {
@@ -970,7 +969,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 								log("Problem in setting field %s", e, f.getName());
 							}
 						else {
-							log("A converter needed for %s of %s", null, f.getType(), f.getName());
+							log("A converter can be needed for %s of %s (%s %s)", null, f.getType(), f.getName(), fieldClass, v);
 							if (convertor != null) {
 								try {
 									f.set(model, convertor.convert(v, getTimeZone(), getLocale()));
@@ -1039,6 +1038,14 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		if (validationException != null)
 			throw validationException;
 		return model;
+	}
+	
+	/** injects model and other references to objects like validator
+	 * 
+	 * @param obj usually just created object with Inject annotations
+	 */
+	public void inject(Object obj) {
+		
 	}
 
 	/** normalize string accordingly normalization codes, all codes get applied unless

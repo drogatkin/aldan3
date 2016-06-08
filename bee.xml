@@ -10,7 +10,7 @@
       <!ENTITY domain "org">
       <!ENTITY resources "&domain;.&project;.resources">
       <!ENTITY manifestf "">
-      <!ENTITY main_class "">
+      <!ENTITY main_class "&domain;.&project;.util.inet.SendMail">
       ]>
 <!-- $Id: bee.xml$
    Aldan 3 project build script

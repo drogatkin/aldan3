@@ -72,7 +72,11 @@ public class Main extends FrontController {
 			@Override
 			public void log(String severity, String where, String message, Throwable t, Object... details) {
 				if (details != null && details.length > 0)
-					message = String.format(message, details);
+					try {
+						message = String.format(message, details);
+					} catch (Exception e) {
+						message = "Error in formatting " + message + ", " + e;
+					}
 				Main.this.log(String.format("%s %s", severity, message), t);
 			}
 		};
@@ -109,7 +113,7 @@ public class Main extends FrontController {
 	}
 	
 	public static String getResourceId(String servletName, ResourceType type) {
-		return servletName+"_resourse_"+type;
+		return servletName+"_resource_"+type;
 	}
 	
 	@Override

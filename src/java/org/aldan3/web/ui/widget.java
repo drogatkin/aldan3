@@ -103,7 +103,7 @@ public class widget {
 					if (false && fd.autosuggest()) {
 						html.append("\" onkeyup=\"autosuggest(this)");
 					}
-					html.append("\">");
+					html.append("\" ").append(fd.presentStyle()).append(">");
 				}
 				addRequiredMark(html, fd);
 			} else if (fd.presentType() == FormField.FieldType.Password) {
@@ -137,6 +137,10 @@ public class widget {
 					html.append("hidden\" ");
 				else
 					html.append("text\" readonly ");
+				if(fd.presentTitle().length() > 0 ) // limitation, resources ar enot used 
+					html.append("title=\"").append(fd.presentLabel()).append("\" ");
+				if(fd.presentLabel().length() > 0 ) // limitation, resources ar enot used 
+					html.append("placeholder=\"").append(fd.presentLabel()).append("\" ");
 				html.append(" name=\"").append(name).append("\" value=\"");
 				if (value != null)
 					html.append(HttpUtils.htmlEncode(value.toString()));
