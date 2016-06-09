@@ -792,6 +792,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				if (ff.converter() != null && ff.converter() != FieldConverter.class)
 					try {
 						convertor = ff.converter().newInstance();
+						inject(convertor);
 					} catch (InstantiationException e) {
 						log("Can't create convertor %s for %s", null, ff.converter(), f.getName());
 					} catch (IllegalAccessException e) {
