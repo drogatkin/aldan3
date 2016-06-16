@@ -209,7 +209,7 @@ public class CsvTokenizer {
 				} else
 					metQ = true;
 			else if (_delim.indexOf(c) >= 0 || c == '\r' || c == '\n') {
-				if (_delim.indexOf(c) >= 0) { // Dilimitor found
+				if (_delim.indexOf(c) >= 0) { // Delimitor found
 					sawAdlim = true;
 				}
 				if (quoted == 0 || (quoted != 0 && metQ)) {

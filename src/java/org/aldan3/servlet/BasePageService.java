@@ -1433,7 +1433,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		} catch (Exception nfe) {
 		}
 		if (contentLength > maxReqLength) {
-			log("Upload size "+contentLength+" exceeding max allowed: "+maxReqLength, null);
+			log("Upload size "+contentLength+" exceeds max allowed: "+maxReqLength+", specify or correct max size property: "+Constant.Property.MAX_UPLOAD_SIZE, null);
 			sis.skip(contentLength);
 			return null;
 		}
