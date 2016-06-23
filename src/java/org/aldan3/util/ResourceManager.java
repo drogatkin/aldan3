@@ -507,7 +507,7 @@ public class ResourceManager {
 				resource = createResource(path, requester);
 				if (resource != null) {
 					resource.setName(cacheName);
-					log("Put in cache under " + cacheName);
+					log("Put in cache: "+resource);
 					synchronized (storage) {
 						if (storage.size() >= maxSize)
 							resizeTo(maxSize);
@@ -776,7 +776,7 @@ public class ResourceManager {
         for (int i = 0; i < arpaths.length; i++) {
 			File f;
 			try {
-				f = arpaths[i].startsWith("file:")?new File(new URL(arpaths[i]).getFile()):new File(arpaths[i]);
+				f = arpaths[i].startsWith("file:")?new File(new URL(arpaths[i]).getFile()):workDirBugWWA(new File(arpaths[i]));
 				if (f.exists() && f.isDirectory())
 					files.add(f);
 				else
@@ -787,6 +787,16 @@ public class ResourceManager {
         return (File[]) files.toArray(new File[files.size()]);
     }
 
+    protected static File workDirBugWWA(File f) {
+    	if (f == null)
+    		throw new NullPointerException("File is null");
+    	String p = f.getPath();
+    	if (p.length() == 0 || p.charAt(0) == '.') {
+    		return new File(System.getProperty("user.dir"), p);
+    	}
+    	return f;
+    }
+    
     protected static URL[] parseSearchURLsString(String strurls) {
         if (strurls == null)
             return new URL[] { null };

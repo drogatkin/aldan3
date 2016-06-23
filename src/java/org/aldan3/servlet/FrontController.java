@@ -58,20 +58,20 @@ public class FrontController extends HttpServlet {
 		try {
 			properties.load(_config.getServletContext().getResourceAsStream(location));
 		} catch (Exception e) {
-			log(ID + " " + e + " :Failed reading a config as a resource '" + location
+			log(ID + " " + e + " : Failed reading a config as a resource '" + location
 					+ "'.  An attempt of reading  as a file path follows.");
 			try {
 				properties.load(new FileInputStream(location));
 			} catch (Exception e2) {
 				log(ID + " " + e2
-						+ ": Failed reading a config as file.  An attempt of reading as class loader resource follows.");
+						+ ": Failed reading a config as a file.  An attempt of reading as class loader resource follows.");
 				try {
 					properties.load(getClass().getClassLoader().getResourceAsStream(location));
 				} catch (Exception e3) {
 					log(ID
 							+ " "
 							+ e3
-							+ ": Failed reading a config as class path resource.  The application can not function properly.");
+							+ ": Failed reading a config as a class path resource.  The application can not function properly.");
 				}
 			}
 		}

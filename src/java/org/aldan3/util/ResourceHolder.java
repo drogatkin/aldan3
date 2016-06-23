@@ -81,7 +81,8 @@ scanPaths:
 				result = (ResourceHolder)Class.forName(resourceType.getResourceHolderClassName()).newInstance();
 				result.lastModified = resFile.lastModified();
 				result.updateData(result.getResourceFromStream(is = new FileInputStream(resFile), encoding));
-				result.address = resFile.toURL();
+				result.address = resFile.toURI().toURL();
+				//ResourceManager.log("url:"+result.address +" for "+resFile+" modified "+result.lastModified+" "+resFile.getPath());
 				result.encoding = encoding;
 			}
 		} catch(Exception ex) {
@@ -342,13 +343,15 @@ scanPaths:
 	}
 	
 	protected static boolean checkFile(File file) {
-		ResourceManager.debug("Checking file "+file);
 		if (file.exists() && file.isFile())
 			try {
 				file.getCanonicalPath();
+				ResourceManager.debug("Checking "+file+", found");
 				return true;
 			} catch(IOException ioe) {
+				ResourceManager.debug("Canonical path error: "+ioe);
 			}
+		ResourceManager.debug("Checking "+file+", not found");
 		return false;
 	}
 		
@@ -415,7 +418,7 @@ scanPaths:
 	}
 	
 	public String toString() {
-		return "Resource "+name+" url: "+address;
+		return "Resource '"+name+"' at url: "+address;
 	}
 	
 	protected abstract Object getResourceFromStream(InputStream is, String _encoding) throws IOException;
