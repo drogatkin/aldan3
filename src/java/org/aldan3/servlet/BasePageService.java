@@ -1439,7 +1439,14 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		}
 		// TODO: do not allocate buffer for all content length, just keep
 		// reading
-		byte[] buffer = new byte[contentLength];
+		byte[] buffer = null;
+		try {
+		    buffer = new byte[contentLength];
+		} catch(OutOfMemoryError oum) {
+			log("Can't allocate a buffer of "+contentLength+" bytes, increase a heap size or review section <multipart-config> of web.xml", oum);
+			sis.skip(contentLength);
+			return null;			
+		}
 		int contentRead = 0;
 		main_loop: do {
 			if (contentRead > contentLength)
