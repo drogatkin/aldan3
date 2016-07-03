@@ -75,6 +75,10 @@ public class Registry {
 		return null;
 	}
 
+	public <SP extends ServiceProvider> SP getService(Class<SP> serviceClass) {
+		return serviceClass.cast(getService(serviceClass.getName()));
+	}
+	
 	public ServiceProvider getService(String serviceName) {
 		rwl.readLock().lock();
 		try {

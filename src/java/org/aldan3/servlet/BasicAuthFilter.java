@@ -47,6 +47,7 @@ public class BasicAuthFilter implements Filter {
 			int i = credentials.indexOf(':');
 			String u = credentials.substring(0, i);
 			String p = credentials.substring(i + 1);
+			//System.err.println("us "+user+",p "+password+" uc "+u+", pc "+p );
 			if (u.endsWith(user) && password.equals(p)) {
 				chain.doFilter(req, resp);
 				return;
