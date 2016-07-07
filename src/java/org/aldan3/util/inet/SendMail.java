@@ -277,7 +277,7 @@ public class SendMail {
 			// TODO: check that args[2] is correct domain name
 			// s.write(escapeSpecials(_mailFrom));
 
-			s.write(_mailFrom);
+			s.write(purePath(_mailFrom));
 
 			if (_mailFrom.indexOf('@') < 0) {
 				s.write("@");
@@ -366,6 +366,19 @@ public class SendMail {
 			if (s != null)
 				s.close(); // TODO should catch IOException to do not mask an original exception
 		}
+	}
+
+	protected String purePath(String _mailFrom) {
+		// TODO use regexp to extract
+		int ltp = _mailFrom.indexOf('<');
+		if (ltp < 0)
+			return _mailFrom;
+		int gtp = _mailFrom.indexOf('>');
+		if (gtp < 0)
+			return _mailFrom.substring(ltp);
+		if (gtp < ltp)
+			throw new IllegalArgumentException("Illegal e-mail format: " + _mailFrom);
+		return _mailFrom.substring(ltp + 1, gtp);
 	}
 
 	public static void main(String[] args) {
