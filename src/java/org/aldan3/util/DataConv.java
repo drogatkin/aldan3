@@ -341,6 +341,11 @@ public class DataConv {
 		
 		return s.substring(0, max-4) + "...";
 	}
+
+	// TODO add mode to manage of cutting begining, end of middle and perhaps for UI 
+	public static String ellipsis(String s, int max, int mode) {
+              return truncate(s, max);
+	}
 	
 	/** represents long value as human readable string with units
 	 * 

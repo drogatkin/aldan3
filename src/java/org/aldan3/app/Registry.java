@@ -41,13 +41,14 @@ public class Registry {
 
 	ReentrantReadWriteLock rwl = new ReentrantReadWriteLock();
 
-	public void register(ServiceProvider sp) {
+	public <SP extends ServiceProvider> SP register(SP sp) {
 		try {
 			rwl.writeLock().lock();
 			if (services.get(sp.getPreferredServiceName()) == null)
 				services.put(sp.getPreferredServiceName(), sp);
 			//else
 				//throw new RegistryException("Service is already registered");
+			return (SP)sp;
 		} finally {
 			rwl.writeLock().unlock();
 		}
