@@ -42,6 +42,7 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.Part;
 
 import org.aldan3.annot.Behavior;
+import org.aldan3.annot.DBField;
 import org.aldan3.annot.FormField;
 import org.aldan3.data.util.FieldConverter;
 import org.aldan3.data.util.FieldValidator;
@@ -51,6 +52,7 @@ import org.aldan3.model.Log;
 import org.aldan3.model.ProcessException;
 import org.aldan3.model.TemplateProcessor;
 import org.aldan3.util.ArrayEntryMap;
+import org.aldan3.util.DataConv;
 import org.aldan3.util.ResourceException;
 import org.aldan3.util.ResourceManager;
 import org.aldan3.util.Stream;
@@ -777,6 +779,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		for (Field f : flds) {
 			FormField ff = f.getAnnotation(FormField.class);
 			if (ff != null && ff.presentType() != FormField.FieldType.Readonly) {
+		
 				String name = ff.formFieldName().length() == 0 ? f.getName() : ff.formFieldName();
 				FieldValidator validator = null;
 				if (ff.validator() != null && ff.validator() != FieldValidator.class)
@@ -799,6 +802,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 						log("Can't access convertor %s for %s", null, ff.converter(), f.getName());
 					}
 				String normalizeCodes = ff.normalizeCodes().toUpperCase();
+				
 				String v = null;
 				Class<?> fieldClass = f.getType();
 				try {
@@ -938,6 +942,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 											ta[i] = convertor.convert(v, getTimeZone(), getLocale());
 											if (validator != null)
 												validator.validate(ta[i]);
+											// TODO validate length and do other adjustments accordingly normalizeCodes()
 										}
 										if (fieldClass.isArray())
 											f.set(model, ta);
@@ -953,7 +958,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 					} else { // scalar
 						v = getParameterValue(name,  normalizeCodes.indexOf('Z') >= 0?null:ff.defaultTo(), index > 0?index:0);
 						if (normalizeCodes.length() > 0)
-							v = normalize(v, normalizeCodes);
+							v = normalize(v, normalizeCodes, f.getAnnotation(DBField.class));
 						if (v == null)
 							continue;
 						if (ff.required() && v.length() == 0)
@@ -1060,11 +1065,13 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 * C/c - convert to title case, all first letters of words get capital, however rest letters
 	 * remain the same
 	 */
-	protected String normalize(String v, String normalizeCodes) {
+	protected String normalize(String v, String normalizeCodes, DBField dbf) {
 		if (normalizeCodes == null || normalizeCodes.length() == 0 || v == null || v.length() == 0)
 			return v;
 		if (normalizeCodes.indexOf('T') >= 0)
 			v = v.trim();
+		if (normalizeCodes.indexOf('E') >= 0 && dbf.size() > 4)
+			v = DataConv.ellipsis(v, dbf.size(), 0);
 		if (normalizeCodes.indexOf('U') >= 0)
 			v = v.toUpperCase(getLocale());
 		else {

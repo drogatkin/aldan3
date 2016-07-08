@@ -314,8 +314,10 @@ public class SendMail {
 
 			s.write("Subject: ");
 			s.writeLine(_subject);
-			s.write("From: ");
-			s.writeLine(_mailFrom);
+			if (_extraHeaders == null || !_extraHeaders.containsKey("From")) {
+				s.write("From: ");
+				s.writeLine(_mailFrom);
+			}
 			String charSet = null;
 			boolean wasTo = false;
 			boolean wasMailer = false;
@@ -341,7 +343,7 @@ public class SendMail {
 			s.write("Date: ");
 			s.writeLine(PROTOCOL_GMTDATE.format(new Date()));
 			if (wasMailer == false)
-				s.writeLine("X-Mailer: genuine Aldan3 framework $Revision: 1.8 $");
+				s.writeLine("X-Mailer: genuine Aldan3 framework (check us at GitHub)");
 
 			s.writeLine("");
 
