@@ -21,6 +21,7 @@ import java.util.Properties;
 import java.util.TimeZone;
 
 import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.UnavailableException;
 import javax.servlet.http.HttpServlet;
@@ -37,7 +38,7 @@ public class FrontController extends HttpServlet {
 
 	private static final String ID = "Aldan.FrontController>";
 
-	private Properties properties;
+	protected Properties properties;
 
 	private boolean initialized;
 
@@ -53,28 +54,8 @@ public class FrontController extends HttpServlet {
 
 	public void init(ServletConfig _config) throws ServletException {
 		super.init(_config);
-		properties = new Properties();
-		String location = _config.getInitParameter(Constant.IP_PROPERTIES).trim();
-		try {
-			properties.load(_config.getServletContext().getResourceAsStream(location));
-		} catch (Exception e) {
-			log(ID + " " + e + " : Failed reading a config as a resource '" + location
-					+ "'.  An attempt of reading  as a file path follows.");
-			try {
-				properties.load(new FileInputStream(location));
-			} catch (Exception e2) {
-				log(ID + " " + e2
-						+ ": Failed reading a config as a file.  An attempt of reading as class loader resource follows.");
-				try {
-					properties.load(getClass().getClassLoader().getResourceAsStream(location));
-				} catch (Exception e3) {
-					log(ID
-							+ " "
-							+ e3
-							+ ": Failed reading a config as a class path resource.  The application can not function properly.");
-				}
-			}
-		}
+		if (properties == null) 
+			properties = loadProperties(_config.getInitParameter(Constant.IP_PROPERTIES).trim(), _config.getServletContext(), null);
 		helpersCache = new PageHelpersCache();
 		servicesPackage = properties.getProperty(Constant.Property.PRESENT_SERV_PACKG);
 		if (servicesPackage != null) {
@@ -106,6 +87,37 @@ public class FrontController extends HttpServlet {
 		resources = new HashSet<Closeable>();
 
 		initialized = true;
+	}
+		
+	public static Properties loadProperties(String location, ServletContext ctx, ClassLoader cl) {
+		if (location == null || location .isEmpty())
+			return null;
+		Properties result = new Properties();		
+		try {
+			result.load(ctx.getResourceAsStream(location));
+		} catch (Exception e) {
+			ctx.log(ID + " " + e + " : Failed reading a config as a resource '" + location
+					+ "'.  An attempt of reading  as a file path follows.");
+			try {
+				result.load(new FileInputStream(location));
+			} catch (Exception e2) {
+				ctx.log(ID + " " + e2
+						+ ": Failed reading a config as a file.  An attempt of reading as class loader resource follows.");
+				try {
+					if (cl == null)
+						cl = FrontController.class.getClassLoader();
+					result.load(cl.getResourceAsStream(location));
+				} catch (Exception e3) {
+					result = null;
+					ctx.log(ID
+							+ " "
+							+ e3
+							+ ": Failed reading a config as a class path resource.  The application may not function properly.");
+				}
+			}
+		}
+
+		return result;
 	}
 
 	/** Returns servlet
