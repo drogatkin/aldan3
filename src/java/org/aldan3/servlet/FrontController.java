@@ -36,7 +36,7 @@ import javax.servlet.http.HttpServletResponse;
 public class FrontController extends HttpServlet {
 	public String servicesPackage = "org.aldan3.servlet.";
 
-	private static final String ID = "Aldan.FrontController>";
+	private static final String ID = "Aldan3.FrontController>";
 
 	protected Properties properties;
 
@@ -96,13 +96,13 @@ public class FrontController extends HttpServlet {
 		try {
 			result.load(ctx.getResourceAsStream(location));
 		} catch (Exception e) {
-			ctx.log(ID + " " + e + " : Failed reading a config as a resource '" + location
-					+ "'.  An attempt of reading  as a file path follows.");
+			ctx.log(ID + " " + e + " : Failed reading a config as a resource '" + (location==null?"NULL":location)
+					+ "'.");
 			try {
 				result.load(new FileInputStream(location));
 			} catch (Exception e2) {
 				ctx.log(ID + " " + e2
-						+ ": Failed reading a config as a file.  An attempt of reading as class loader resource follows.");
+						+ ": Failed reading a config as a file.");
 				try {
 					if (cl == null)
 						cl = FrontController.class.getClassLoader();
@@ -116,7 +116,6 @@ public class FrontController extends HttpServlet {
 				}
 			}
 		}
-
 		return result;
 	}
 
