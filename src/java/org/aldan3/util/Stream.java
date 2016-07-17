@@ -8,6 +8,7 @@ package org.aldan3.util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -17,6 +18,7 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 public class Stream {
@@ -153,6 +155,28 @@ public class Stream {
 				len = buffer.length;
 		}
 		return result;
+	}
+	
+	public static void close(Object... resources) {
+		if (resources != null)
+			for (Object resource : resources)
+				if (resource != null)
+					if (resource instanceof Closeable)
+						try {
+							((Closeable) resource).close();
+						} catch (Exception e) {
+
+						}
+					else {
+						try {
+							resource.getClass().getMethod("close").invoke(resource);
+						} catch (NoSuchMethodException e) {
+							throw new IllegalArgumentException(
+									"Attempt to release non closeable resource: " + resource);
+						} catch (Exception e) {
+
+						}
+					}
 	}
 
 }

@@ -204,7 +204,7 @@ public class TreeViewHelper implements Serializable {
 	protected String treeId;
 
 	// PROBLEM: where to keep state of a tree? in URL, or in internal storage
-	// accessable by session and tree id, or somewhere else?
+	// accessible by session and tree id, or somewhere else?
 	public TreeViewHelper(String _treeId) {
 		if (_treeId == null)
 			treeId = "";
