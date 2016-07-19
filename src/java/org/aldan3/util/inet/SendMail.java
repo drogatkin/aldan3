@@ -174,6 +174,10 @@ public class SendMail {
 		properties = _properties;
 	}
 
+	public void send(String _mailFrom, String _mailTo, String _subject, String _body, Properties _extraHeaders) throws IOException {
+		send(_mailFrom, _mailTo, _subject, _body, _extraHeaders, false);
+	}
+	
 	/** Initiates of mail send.
 	 * <p> An example of use:
 	 * <pre>
@@ -194,9 +198,10 @@ public class SendMail {
 	 * @param _subject subject of mail
 	 * @param _body body of mail, can be html or have attachments if extra headers specified
 	 * @param _extraHeaders allow to customize e-mail using different display TO values, MIME types and so on
+	 * @param _raw, when true, then body is considered as has already all headers, except additional and adding them skipped
 	 * @throws IOException if there is a problem of sending e-mail including error responses from SMTP server
 	 */
-	public void send(String _mailFrom, String _mailTo, String _subject, String _body, Properties _extraHeaders)
+	public void send(String _mailFrom, String _mailTo, String _subject, String _body, Properties _extraHeaders, boolean _raw)
 			throws IOException {
 		if (properties == null)
 			properties = System.getProperties();
@@ -310,13 +315,15 @@ public class SendMail {
 			s.writeLine("DATA");
 			s.flush();
 
-			s.getResult();
+			s.getResult(); // TODO check 235
 
-			s.write("Subject: ");
-			s.writeLine(_subject);
-			if (_extraHeaders == null || !_extraHeaders.containsKey("From")) {
-				s.write("From: ");
-				s.writeLine(_mailFrom);
+			if (!_raw) {
+				s.write("Subject: ");
+				s.writeLine(_subject);
+				if (_extraHeaders == null || !_extraHeaders.containsKey("From")) {
+					s.write("From: ");
+					s.writeLine(_mailFrom);
+				}
 			}
 			String charSet = null;
 			boolean wasTo = false;
@@ -336,17 +343,18 @@ public class SendMail {
 					}
 				}
 			}
-			if (wasTo == false) {
-				s.write("To: ");
-				s.writeLine(_mailTo);
+			if (!_raw) {
+				if (wasTo == false) {
+					s.write("To: ");
+					s.writeLine(_mailTo);
+				}
+				s.write("Date: ");
+				s.writeLine(PROTOCOL_GMTDATE.format(new Date()));
+				if (wasMailer == false)
+					s.writeLine("X-Mailer: genuine Aldan3 framework (check us at GitHub)");
+
+				s.writeLine("");
 			}
-			s.write("Date: ");
-			s.writeLine(PROTOCOL_GMTDATE.format(new Date()));
-			if (wasMailer == false)
-				s.writeLine("X-Mailer: genuine Aldan3 framework (check us at GitHub)");
-
-			s.writeLine("");
-
 			if (_body != null && _body.length() > 0) {
 				if (charSet == null)
 					s.writeBytes(fixDataLines(_body).getBytes());
