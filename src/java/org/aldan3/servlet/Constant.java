@@ -37,6 +37,8 @@ public interface Constant {
 		public static final String LABEL = "LABEL";
 
 		public static final String MODEL = "MODEL";
+		
+		public static final String AUTHETICATE_REQ = "AUTHENTICATED_REQUESTER";
 	}
 
 	public static interface Property {

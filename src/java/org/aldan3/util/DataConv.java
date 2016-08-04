@@ -316,6 +316,15 @@ public class DataConv {
 		return obj.toString();
 	}
 	
+	/** checks if a string not null and not empty
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static boolean hasValue(String s) {
+		return s!= null && s.length() > 0;
+	}
+	
 	/** returns first parameter which isn't null
 	 * 
 	 * @param vals parameters

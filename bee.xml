@@ -248,6 +248,15 @@
      </operator>
   </expression>
 
+  <target name="bar" dir="PROJECT_HOME">
+    <echo>Running...</echo>
+    <dependency target="jar"/>
+    <dependency value="&main_class;"/>
+    <task name="main" code="org.aldan3.util.BarCode2D" path="run class path">
+       <parameter variable="~#args#~"/>
+    </task>
+  </target>  
+
   <target name="run" dir="PROJECT_HOME">
     <echo>Running...</echo>
     <dependency target="jar"/>
