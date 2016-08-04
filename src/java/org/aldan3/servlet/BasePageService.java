@@ -123,8 +123,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			return;
 		}
 
-		boolean submit = getStringParameterValue(Constant.Form.SUBMIT,
-				getStringParameterValue(Constant.Form.SUBMIT_X, null, 0), 0) != null;
+		boolean submit = DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
+				getStringParameterValue(Constant.Form.SUBMIT_X, null, 0), 0));
 		if (forwarded) {
 			String query = req.getQueryString();
 			if (query == null || query.indexOf(Constant.Form.SUBMIT + '=') < 0)
