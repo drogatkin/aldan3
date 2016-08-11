@@ -112,11 +112,12 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		if (charSet == null)
 			charSet = Constant.CharSet.ASCII;
 		this.req.setCharacterEncoding(charSet);
-		multiFormData = fillMultipartData(req, resp); // TODO store as request attribute?		
+		multiFormData = fillMultipartData(req, resp); // TODO store as request attribute?
+		String pi = this.req.getPathInfo();
+		boolean ajax = isAjax(pi);
 		start();
 		if (isAllowed(isPublic()) == false) {
-			String pi = this.req.getPathInfo();
-			if (pi != null && pi.startsWith("/ajax"))
+			if (ajax)
 				this.resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Not allowed or expired");
 			else
 				redirect(this.req, this.resp, getUnauthorizedPage());
@@ -127,8 +128,20 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				getStringParameterValue(Constant.Form.SUBMIT_X, null, 0), 0));
 		if (forwarded) {
 			String query = req.getQueryString();
-			if (query == null || query.indexOf(Constant.Form.SUBMIT + '=') < 0)
+			if (query == null) 
 				submit = false;
+				else {
+					int sp = query.indexOf(Constant.Form.SUBMIT + '=');
+					if (sp < 0)
+						submit = false;
+					else {
+						int psp = query.indexOf('&', sp+1);
+						if (psp < 0)
+							psp = query .length();
+						if (psp - sp <= Constant.Form.SUBMIT.length()+1)
+							submit = false;
+					}
+				}
 		}
 		if (submit && isAllowedGet() == false && "POST".equals(req.getMethod()) == false) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -136,17 +149,16 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		}
 		// TemplateEngine.CurrentRequest.setRequest(req);
 		PrintWriter w = null;
-		String pi = req.getPathInfo();
-		boolean ajax = false;
 		try {
-			if (pi != null && pi.startsWith("/ajax")) {
+			String methodName = null;
+			String npi = null;	
+			if (ajax && pi != null) {
 				// find out method pref, and use
 				// processXXXCall(), and getXXXViewName()
 				int ns = "/ajax".length(), se, il = pi.length();
-				String methodName = "Ajax";
-				ajax = true;
-				String npi = null;
-				if (il > ns) {
+				// TODO investigate if isAjax() isn't in sync with Ajax path pattern
+				methodName = getDefaultAjaxMethodName();
+				if (il > ns && methodName != null) {					
 					if (pi.charAt(ns) == '/')
 						ns++;
 					if (il > ns) {
@@ -159,6 +171,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 							methodName = pi.substring(ns);
 					}
 				}
+			}
+			if (methodName != null) {
 				final String fnpi = npi;
 				this.req = new HttpServletRequestWrapper(req) {
 
@@ -169,14 +183,13 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 					
 				};
 				try {
-					// TODO wrap req to represent pathinfo coming from modified 
 					Object respData = applySideEffects(getClass().getMethod("process" + methodName + "Call").invoke(
 							this));
 					if (respData instanceof Map) {
 						w = processView(respData, (String) getClass().getMethod("get" + methodName + "ViewName")
-								.invoke(this), true);
+								.invoke(this), ajax);
 					} else if (respData != null) {
-						setContentType("", null);
+						setContentType("", null); // TODO investigate "application/json"
 						w = resp.getWriter();
 						w.write(respData.toString());
 					}
@@ -199,11 +212,11 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 						w = resp.getWriter();
 						w.write(controlData.toString());
 					} else
-						w = processView(controlData, getViewName(), false);
+						w = processView(controlData, getViewName(), ajax);
 				}
 				return;
 			}
-			w = processView(applySideEffects(getModel()), getViewName(), false);
+			w = processView(applySideEffects(getModel()), getViewName(), ajax);
 		} catch (Throwable t) {
 			if (t instanceof ThreadDeath)
 				throw (ThreadDeath) t;
@@ -1181,7 +1194,24 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		// Note no reason for session.isNew() == false
 		return req.getServletPath().equalsIgnoreCase((String) session.getAttribute(Constant.Session.SIGNED));
 	}
-
+	
+	/** allows to customize request processing based on assumption it is Ajax call
+	 * 
+	 * @param pathInfo
+	 * @return true if a request can be categorized by Ajax by aby criteria
+	 */
+	protected boolean isAjax(String pathInfo) {
+		return pathInfo != null && pathInfo.startsWith("/ajax");
+	}
+	
+	/** Allows to redefine default Ajax handler
+	 * 
+	 * @return default Ajax handler name
+	 */
+	protected String getDefaultAjaxMethodName() {
+		return "Ajax";
+	}
+	
 	/** gives control to initialize state of service before using it
 	 * 
 	 */
