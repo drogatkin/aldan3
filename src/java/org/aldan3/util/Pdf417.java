@@ -6,6 +6,8 @@
  */
 package org.aldan3.util;
 
+import java.util.Arrays;
+
 public class Pdf417 {
 
 	static final int TEX = 900;
@@ -880,7 +882,7 @@ public class Pdf417 {
 
 		public int symbology;
 
-		public int row_height[];
+		public int row_height[] = new int[ROWS_MAX];
 
 		public int output_options;
 
@@ -919,6 +921,7 @@ public class Pdf417 {
 			while ((liste[1][indexliste] == mode) && (indexchaine < length)) {
 				liste[0][indexliste]++;
 				indexchaine++;
+				 if (indexchaine >= length) break;
 				mode = quelmode(chaine[indexchaine]);
 			}
 			indexliste++;
@@ -1685,7 +1688,9 @@ public class Pdf417 {
 		sym.symbology = BARCODE_HIBC_PDF;
 		args[0] = "+"+args[0];
 		char [] ca = args[0].toCharArray();
-		new Pdf417().pdf417enc(sym, ca, ca.length);
+		sym.option_3 = 928;
+		System.out.printf("%s encoded with error %d / %s%n", args[0], new Pdf417().pdf417enc(sym, ca, ca.length), sym.errtxt);
+		System.out.printf("Row heights %s, %dX%d%n", Arrays.toString(sym.row_height), sym.height, sym.width);
 	}
 
 }
