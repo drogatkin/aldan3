@@ -6,6 +6,7 @@
  */
 package org.aldan3.util;
 
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -313,6 +314,9 @@ public class DataConv {
 	public static String objectToString(Object obj) {
 		if (obj == null)
 			return "";
+		if (obj instanceof Date) {
+			return DateTime.dateToJson((Date)obj);
+		}
 		return obj.toString();
 	}
 	

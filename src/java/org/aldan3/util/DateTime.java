@@ -6,14 +6,18 @@
  */
 package org.aldan3.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import org.aldan3.app.Env;
+
 public class DateTime {
 
-	/** Convenient method to set date hours without using deprecated method
+	/**
+	 * Convenient method to set date hours without using deprecated method
 	 * 
 	 * @param date
 	 * @param hours
@@ -34,6 +38,21 @@ public class DateTime {
 		Calendar cal = getCalendar(timeZone, locale);
 		cal.setTime(date);
 		return cal.get(Calendar.HOUR_OF_DAY);
+	}
+
+	public static String dateToJson(Date date) {
+		return dateToJson(date, null);
+	}
+
+	public static String dateToJson(Date date, SimpleDateFormat fmtr) {
+		if (date == null)
+			return "";
+		if (fmtr == null)
+			if (Env.getJavaVersion() > 7)
+				fmtr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH);
+			else
+				fmtr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ", Locale.ENGLISH);
+		return fmtr.format(date);
 	}
 
 	protected static Calendar getCalendar(TimeZone timeZone, Locale locale) {

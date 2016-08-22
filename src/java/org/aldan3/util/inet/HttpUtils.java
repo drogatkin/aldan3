@@ -293,7 +293,7 @@ public class HttpUtils {
 		return toReturn.toString();
 	}
 
-	/** CZonvert arbitrary string to string with escaping upon JSON format 
+	/** Convert an arbitrary string to string with escaping upon JSON format 
 	 * 
 	 * @param _s input string
 	 * @return JSON escaped string
