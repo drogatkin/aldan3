@@ -14,6 +14,10 @@ public class Pdf417 {
 
 	static final int READER_INIT = 16;
 	static final int BARCODE_PDF417TRUNC = 56;
+	
+	static final int  BARCODE_HIBC_PDF	= 106;
+	static final int  BARCODE_HIBC_MICPDF	= 108;
+
 
 	static final int ZWARN_INVALID_OPTION = 2;
 	static final int ZERROR_TOO_LONG = 5;
@@ -1671,6 +1675,17 @@ public class Pdf417 {
 			}
 		}
 		return pattern;
+	}
+	
+	static String ALLOWED_CHARS = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ-. $/+%";
+	
+	public static void main(String ...args) {
+		System.out.printf("Pdf417 test%n", "");
+		Symbol sym = new Symbol();
+		sym.symbology = BARCODE_HIBC_PDF;
+		args[0] = "+"+args[0];
+		char [] ca = args[0].toCharArray();
+		new Pdf417().pdf417enc(sym, ca, ca.length);
 	}
 
 }

@@ -18,7 +18,6 @@ import java.io.OutputStream;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 
 public class Stream {

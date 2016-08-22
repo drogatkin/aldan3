@@ -1307,13 +1307,13 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		return req.getHeader(name);
 	}
 
-	protected ResourceManager getResourceManager(ResourceType type) {
+	public ResourceManager getResourceManager(ResourceType type) {
 		if (frontController instanceof Main)
 			return ((Main) frontController).getResourceManager(type);
 		return ResourceManager.getResourceManager(type);
 	}
 
-	protected void log(String message, Throwable t, Object... details) {
+	public void log(String message, Throwable t, Object... details) {
 		if (details != null && details.length > 0)
 			try {
 				message = String.format(message, details);
