@@ -14,27 +14,27 @@ public class Pdf417 {
 	static final int BYT = 901;
 	static final int NUM = 902;
 
-	static final int READER_INIT = 16;
-	static final int BARCODE_PDF417TRUNC = 56;
+	public static final int READER_INIT = 16;
+	public static final int BARCODE_PDF417TRUNC = 56;
 	
-	static final int  BARCODE_HIBC_PDF	= 106;
-	static final int  BARCODE_HIBC_MICPDF	= 108;
+	public static final int  BARCODE_HIBC_PDF	= 106;
+	public static final int  BARCODE_HIBC_MICPDF	= 108;
 
 
-	static final int ZWARN_INVALID_OPTION = 2;
-	static final int ZERROR_TOO_LONG = 5;
-	static final int ZERROR_INVALID_DATA = 6;
-	static final int ZERROR_INVALID_CHECK = 7;
-	static final int ZERROR_INVALID_OPTION = 8;
-	static final int ZERROR_ENCODING_PROBLEM = 9;
-	static final int ZERROR_FILE_ACCESS = 10;
-	static final int ZERROR_MEMORY = 11;
+	public static final int ZWARN_INVALID_OPTION = 2;
+	public static final int ZERROR_TOO_LONG = 5;
+	public static final int ZERROR_INVALID_DATA = 6;
+	public static final int ZERROR_INVALID_CHECK = 7;
+	public static final int ZERROR_INVALID_OPTION = 8;
+	public static final int ZERROR_ENCODING_PROBLEM = 9;
+	public static final int ZERROR_FILE_ACCESS = 10;
+	public static final int ZERROR_MEMORY = 11;
 
 	static final int COLS_MAX = 178;
 
 	static final int ROWS_MAX = 178;
 
-	static final String BRSET = "ABCDEFabcdefghijklmnopqrstuvwxyz*+-";
+	public  static final String BRSET = "ABCDEFabcdefghijklmnopqrstuvwxyz*+-";
 
 	/* PDF417 error correction coefficients from Grand Zebu */
 	static final int coefrs[] = {
@@ -891,12 +891,14 @@ public class Pdf417 {
 		public int width, height;
 
 		public String errtxt;
+		
+		public String input;
 
 		public int encoded_data[][] = new int[ROWS_MAX][COLS_MAX];
 	}
 
 	/* 366 */
-	int pdf417(Symbol symbol, char chaine[], int length) {
+	protected int pdf417(Symbol symbol, char chaine[], int length) {
 		int i, k, j, indexchaine, indexliste, mode, longueur, loop, mccorrection[] = new int[520], offset;
 		int total, chainemc[] = new int[2700], mclength, c1, c2, c3, dummy[] = new int[35], codeerr;
 		//char codebarre[140], pattern[580];
@@ -1186,7 +1188,7 @@ public class Pdf417 {
 	}
 
 	/* 345 */
-	int pdf417enc(Symbol symbol, char source[], int length) {
+	public int pdf417enc(Symbol symbol, char source[], int length) {
 		int codeerr, error_number;
 
 		error_number = 0;
@@ -1691,6 +1693,9 @@ public class Pdf417 {
 		sym.option_3 = 928;
 		System.out.printf("%s encoded with error %d / %s%n", args[0], new Pdf417().pdf417enc(sym, ca, ca.length), sym.errtxt);
 		System.out.printf("Row heights %s, %dX%d%n", Arrays.toString(sym.row_height), sym.height, sym.width);
+		for (int r=0; r<sym.encoded_data.length; r++)
+			System.out.printf("%d->%s%n", r, Arrays.toString(sym.encoded_data[r]));
+		
 	}
 
 }
