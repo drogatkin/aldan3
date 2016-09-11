@@ -374,4 +374,17 @@ public class DataConv {
 		}
 		return String.format("%.1f %cB", bytes/1024f, " KMGTPE".charAt(u));
 	}
+	
+	/** removes enclosing quotes (double)
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String unquote(String s) {
+		if (s.startsWith("\""))
+			s = s.substring(1);
+		if (s.endsWith("\""))
+			s = s.substring(0, s.length() - 1);
+		return s;
+	}
 }

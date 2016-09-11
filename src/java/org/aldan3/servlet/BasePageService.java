@@ -124,24 +124,25 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			return;
 		}
 
-		boolean submit = DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
+		// TODO make submit condition customizable - isSubmit()
+		boolean submit = "PUT".equals(req.getMethod()) == false && DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
 				getStringParameterValue(Constant.Form.SUBMIT_X, null, 0), 0));
 		if (forwarded) {
 			String query = req.getQueryString();
-			if (query == null) 
+			if (query == null)
 				submit = false;
+			else {
+				int sp = query.indexOf(Constant.Form.SUBMIT + '=');
+				if (sp < 0)
+					submit = false;
 				else {
-					int sp = query.indexOf(Constant.Form.SUBMIT + '=');
-					if (sp < 0)
+					int psp = query.indexOf('&', sp + 1);
+					if (psp < 0)
+						psp = query.length();
+					if (psp - sp <= Constant.Form.SUBMIT.length() + 1)
 						submit = false;
-					else {
-						int psp = query.indexOf('&', sp+1);
-						if (psp < 0)
-							psp = query .length();
-						if (psp - sp <= Constant.Form.SUBMIT.length()+1)
-							submit = false;
-					}
 				}
+			}
 		}
 		if (submit && isAllowedGet() == false && "POST".equals(req.getMethod()) == false) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
@@ -151,14 +152,14 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		PrintWriter w = null;
 		try {
 			String methodName = null;
-			String npi = null;	
+			String npi = null;
 			if (ajax && pi != null) {
 				// find out method pref, and use
 				// processXXXCall(), and getXXXViewName()
 				int ns = "/ajax".length(), se, il = pi.length();
 				// TODO investigate if isAjax() isn't in sync with Ajax path pattern
 				methodName = getDefaultAjaxMethodName();
-				if (il > ns && methodName != null) {					
+				if (il > ns && methodName != null) {
 					if (pi.charAt(ns) == '/')
 						ns++;
 					if (il > ns) {
@@ -180,14 +181,14 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 					public String getPathInfo() {
 						return fnpi;
 					}
-					
+
 				};
 				try {
-					Object respData = applySideEffects(getClass().getMethod("process" + methodName + "Call").invoke(
-							this));
+					Object respData = applySideEffects(
+							getClass().getMethod("process" + methodName + "Call").invoke(this));
 					if (respData instanceof Map) {
-						w = processView(respData, (String) getClass().getMethod("get" + methodName + "ViewName")
-								.invoke(this), ajax);
+						w = processView(respData,
+								(String) getClass().getMethod("get" + methodName + "ViewName").invoke(this), ajax);
 					} else if (respData != null) {
 						setContentType("", null); // TODO investigate "application/json"
 						w = resp.getWriter();
@@ -198,8 +199,9 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 						throw (ThreadDeath) e;
 					if (e instanceof InvocationTargetException)
 						e = ((InvocationTargetException) e).getCause();
-					log("Problem in Ajax call (%s).", e, getClass().getName());					
-					resp.sendError(e instanceof NoSuchMethodException?HttpServletResponse.SC_NOT_FOUND:HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
+					log("Problem in Ajax call (%s).", e, getClass().getName());
+					resp.sendError(e instanceof NoSuchMethodException ? HttpServletResponse.SC_NOT_FOUND
+							: HttpServletResponse.SC_INTERNAL_SERVER_ERROR, e.toString());
 				}
 				return;
 			} else if (submit) {
@@ -234,7 +236,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 					try {
 						resp.reset();
 						w = processView(getErrorInfo(t), errorView, true);
-					} catch (Exception /*Throwable*/e) {
+					} catch (Exception /*Throwable*/ e) {
 						log("Unexpected error in the service call processing, can't report in page since problem in reporting "
 								+ e, t);
 					}
@@ -252,7 +254,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			finish();
 		}
 	}
-	
+
 	public void reset() {
 		req = null;
 		resp = null;
@@ -296,8 +298,10 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		}
 		return modelData;
 	}
-	
-	/** this method allows to bypass a mechanism of applying a template in case of returning an error
+
+	/**
+	 * this method allows to bypass a mechanism of applying a template in case
+	 * of returning an error
 	 * 
 	 * @return true, if return raw model as result
 	 */
@@ -315,11 +319,11 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 * @throws IOException
 	 * @throws ServletException
 	 */
-	protected PrintWriter processView(Object modelData, String viewName, boolean ajaxView) throws IOException,
-			ServletException {
+	protected PrintWriter processView(Object modelData, String viewName, boolean ajaxView)
+			throws IOException, ServletException {
 		if (modelData == null)
 			return null;
-		if(viewName == null)
+		if (viewName == null)
 			throw new NullPointerException("View name is null");
 		// TODO provide a canvas way for ajax calls
 		String canvas = ajaxView ? null : getCanvasView();
@@ -343,8 +347,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		TemplateProcessor tp = getTemplateProcessor(viewName);
 		if (tp != null) {
 			if (resp.isCommitted())
-				throw new ServletException("Can't process view, since write operation was initiated. ("
-						+ req.getRequestURI());
+				throw new ServletException(
+						"Can't process view, since write operation was initiated. (" + req.getRequestURI());
 			try {
 				TemplateEngine.CurrentRequest.setRequest(req);
 				setContentType(viewName, null);
@@ -374,10 +378,13 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		return null;
 	}
 
-	/** sets content type
+	/**
+	 * sets content type
 	 * 
-	 * @param viewName view name for auto determination
-	 * @param contentType to override content type
+	 * @param viewName
+	 *            view name for auto determination
+	 * @param contentType
+	 *            to override content type
 	 */
 	protected void setContentType(String viewName, String contentType) {
 		if (contentType == null)
@@ -480,7 +487,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		return -1;
 	}
 
-	/** returns if submit requests are allowed with non POST methods
+	/**
+	 * returns if submit requests are allowed with non POST methods
 	 * 
 	 * @return true if allowed, false otherwise
 	 */
@@ -602,8 +610,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		String viewNamePattern = b != null && b.templatePattern().length() > 0 ? b.templatePattern() : ".*\\.ht.?.?.?";
 		if (viewName.matches(viewNamePattern)) {
 			if (frontController instanceof Main)
-				return (TemplateProcessor) frontController.getAttribute(((Main) frontController)
-						.getTemplateEngineAttributeName());
+				return (TemplateProcessor) frontController
+						.getAttribute(((Main) frontController).getTemplateEngineAttributeName());
 			return (TemplateProcessor) frontController.getAttribute(Constant.ATTR_DEF_TEMPLATE_PROC);
 		}
 		return null;
@@ -757,7 +765,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 * 
 	 * @param model
 	 * @return the object with populated values froma request
-	*/
+	 */
 	public DataObject fillDataObject(DataObject model, Filler filler) {
 		if (model != null) {
 			Set<org.aldan3.model.Field> fields = model.getFields();
@@ -774,13 +782,14 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	public <T> T fillModel(T model) {
 		return fillModel(model, 0);
 	}
-	
+
 	/**
 	 * Fills model from form data
 	 * 
 	 * 
 	 * @param model
-	 * @param parameters set index, works only for models without collection members
+	 * @param parameters
+	 *            set index, works only for models without collection members
 	 * @return
 	 */
 	public <T> T fillModel(T model, int index) {
@@ -792,7 +801,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		for (Field f : flds) {
 			FormField ff = f.getAnnotation(FormField.class);
 			if (ff != null && ff.presentType() != FormField.FieldType.Readonly) {
-		
+
 				String name = ff.formFieldName().length() == 0 ? f.getName() : ff.formFieldName();
 				FieldValidator validator = null;
 				if (ff.validator() != null && ff.validator() != FieldValidator.class)
@@ -815,13 +824,13 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 						log("Can't access convertor %s for %s", null, ff.converter(), f.getName());
 					}
 				String normalizeCodes = ff.normalizeCodes().toUpperCase();
-				
+
 				String v = null;
 				Class<?> fieldClass = f.getType();
 				try {
 					if (fieldClass.isArray() || Collection.class.isAssignableFrom(fieldClass)) { // vector
-						Object[] va = multiFormData != null?(Object[]) multiFormData.get(name):null;
-	
+						Object[] va = multiFormData != null ? (Object[]) multiFormData.get(name) : null;
+
 						if (va == null)
 							va = req.getParameterValues(name);
 						if (va == null || va.length == 0)
@@ -969,15 +978,16 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 							}
 						}
 					} else { // scalar
-						v = getParameterValue(name,  normalizeCodes.indexOf('Z') >= 0?null:ff.defaultTo(), index > 0?index:0);
+						v = getParameterValue(name, normalizeCodes.indexOf('Z') >= 0 ? null : ff.defaultTo(),
+								index > 0 ? index : 0);
 						if (normalizeCodes.length() > 0)
 							v = normalize(v, normalizeCodes, f.getAnnotation(DBField.class));
 						if (v == null)
 							continue;
 						if (ff.required() && v.length() == 0)
-							throw new IllegalArgumentException(String.format(
-									getResourceString(Variable.REQUIRED_MSG, Variable.DEF_REQUIRED_MSG),
-									getResourceString(f.getName(), f.getName())));
+							throw new IllegalArgumentException(
+									String.format(getResourceString(Variable.REQUIRED_MSG, Variable.DEF_REQUIRED_MSG),
+											getResourceString(f.getName(), f.getName())));
 						if (validator != null)
 							validator.validate(v);
 
@@ -988,7 +998,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 								log("Problem in setting field %s", e, f.getName());
 							}
 						else {
-							log("A converter can be needed for %s of %s (%s %s)", null, f.getType(), f.getName(), fieldClass, v);
+							log("A converter can be needed for %s of %s (%s %s)", null, f.getType(), f.getName(),
+									fieldClass, v);
 							if (convertor != null) {
 								try {
 									f.set(model, convertor.convert(v, getTimeZone(), getLocale()));
@@ -1030,7 +1041,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 											f.set(model, 0);
 									}
 								} catch (Exception e) {
-									log("Problem in converting to %s of %s for field %s", e, fieldClass, v, f.getName());
+									log("Problem in converting to %s of %s for field %s", e, fieldClass, v,
+											f.getName());
 								}
 							}
 						}
@@ -1058,25 +1070,28 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			throw validationException;
 		return model;
 	}
-	
-	/** injects model and other references to objects like validator
+
+	/**
+	 * injects model and other references to objects like validator
 	 * 
-	 * @param obj usually just created object with Inject annotations
+	 * @param obj
+	 *            usually just created object with Inject annotations
 	 */
 	public void inject(Object obj) {
-		
+
 	}
 
-	/** normalize string accordingly normalization codes, all codes get applied unless
-	 * controversial 
+	/**
+	 * normalize string accordingly normalization codes, all codes get applied
+	 * unless controversial
+	 * 
 	 * @param v
 	 * @param normalizeCodes
-	 * @return normalized string
-	 * T/t trims extra white spaces from both ends<br>
-	 * U/u convert to upper case<br>
-	 * L/l - convert to lower case<br>
-	 * C/c - convert to title case, all first letters of words get capital, however rest letters
-	 * remain the same
+	 * @return normalized string T/t trims extra white spaces from both ends<br>
+	 *         U/u convert to upper case<br>
+	 *         L/l - convert to lower case<br>
+	 *         C/c - convert to title case, all first letters of words get
+	 *         capital, however rest letters remain the same
 	 */
 	protected String normalize(String v, String normalizeCodes, DBField dbf) {
 		if (normalizeCodes == null || normalizeCodes.length() == 0 || v == null || v.length() == 0)
@@ -1167,11 +1182,25 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		return null;
 	}
 
-	/** returns encoding provided in request
+	/**
+	 * returns encoding provided in request
 	 * 
 	 */
 	public String getEncoding() {
-		return null;
+		String contentType = req.getContentType();
+		if (contentType != null)
+			contentType = contentType.toLowerCase();
+		else
+			return null;
+		int cp = contentType.indexOf("charset=");
+		if (cp < 0)
+			return null;
+		String charset = contentType.substring(cp + "charset=".length()).trim();
+		cp = charset.indexOf(';');
+		if (cp > 0)
+			charset = charset.substring(0, cp);
+
+		return DataConv.unquote(charset);
 	}
 
 	/**
@@ -1194,8 +1223,10 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		// Note no reason for session.isNew() == false
 		return req.getServletPath().equalsIgnoreCase((String) session.getAttribute(Constant.Session.SIGNED));
 	}
-	
-	/** allows to customize request processing based on assumption it is Ajax call
+
+	/**
+	 * allows to customize request processing based on assumption it is Ajax
+	 * call
 	 * 
 	 * @param pathInfo
 	 * @return true if a request can be categorized by Ajax by aby criteria
@@ -1203,27 +1234,30 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	protected boolean isAjax(String pathInfo) {
 		return pathInfo != null && pathInfo.startsWith("/ajax");
 	}
-	
-	/** Allows to redefine default Ajax handler
+
+	/**
+	 * Allows to redefine default Ajax handler
 	 * 
 	 * @return default Ajax handler name
 	 */
 	protected String getDefaultAjaxMethodName() {
 		return "Ajax";
 	}
-	
-	/** gives control to initialize state of service before using it
+
+	/**
+	 * gives control to initialize state of service before using it
 	 * 
 	 */
 	protected void start() {
-		
+
 	}
 
-	/** gives control to finalize state of service after using it
+	/**
+	 * gives control to finalize state of service after using it
 	 * 
 	 */
 	protected void finish() {
-		
+
 	}
 
 	protected void setAllowed(boolean on) {
@@ -1278,8 +1312,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 
 	public ResourceBundle getLocalizedResource(final Locale _locale) {
 		try {
-			return (PropertyResourceBundle) getResourceManager(ResourceManager.RESOURCE_RES).getResource(
-					getResourceName(), new ResourceManager.LocalizedRequester() {
+			return (PropertyResourceBundle) getResourceManager(ResourceManager.RESOURCE_RES)
+					.getResource(getResourceName(), new ResourceManager.LocalizedRequester() {
 
 						public Locale getLocale() {
 							return _locale;
@@ -1365,7 +1399,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 							}
 							String filePath = disp.substring(fp + Constant.HTTP.FILENAME_EQ_QT.length(), ef);
 							result.put(name + '+' + Constant.HTTP.FILENAME, filePath);
-							result.put(name + '+' + Constant.HTTP.CONTENT_TYPE, p.getHeader(Constant.HTTP.CONTENT_TYPE));
+							result.put(name + '+' + Constant.HTTP.CONTENT_TYPE,
+									p.getHeader(Constant.HTTP.CONTENT_TYPE));
 							//Attachment attachment = new Attachment(filePath, p.getHeader(Constant.HTTP.CONTENT_TYPE));
 							//result.put(name, attachment);
 							long fileSize = p.getSize();
@@ -1380,8 +1415,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 										try {
 											//fileSize = uc.getContentLengthLong();
 											fileSize = Long.parseLong(uc.getHeaderField("CONTENT-LENGTH"));
-										} catch(Exception e) {
-											
+										} catch (Exception e) {
+
 										}
 									result.put(name + '+' + Constant.HTTP.CONTENT_TYPE, uc.getContentType());
 									if (fileSize > 0 && fileSize < maxMemPartUse) {
@@ -1470,7 +1505,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		} catch (Exception nfe) {
 		}
 		if (contentLength > maxReqLength) {
-			log("Upload size "+contentLength+" exceeds max allowed: "+maxReqLength+", specify or correct max size property: "+Constant.Property.MAX_UPLOAD_SIZE, null);
+			log("Upload size " + contentLength + " exceeds max allowed: " + maxReqLength
+					+ ", specify or correct max size property: " + Constant.Property.MAX_UPLOAD_SIZE, null);
 			sis.skip(contentLength);
 			return null;
 		}
@@ -1478,11 +1514,12 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		// reading
 		byte[] buffer = null;
 		try {
-		    buffer = new byte[contentLength];
-		} catch(OutOfMemoryError oum) {
-			log("Can't allocate a buffer of "+contentLength+" bytes, increase a heap size or review section <multipart-config> of web.xml", oum);
+			buffer = new byte[contentLength];
+		} catch (OutOfMemoryError oum) {
+			log("Can't allocate a buffer of " + contentLength
+					+ " bytes, increase a heap size or review section <multipart-config> of web.xml", oum);
 			sis.skip(contentLength);
-			return null;			
+			return null;
 		}
 		int contentRead = 0;
 		main_loop: do {
@@ -1634,8 +1671,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 								result.put(name, im);
 							} else {
 								String ss;
-								result.put(name, ss = new String(buffer, marker, contentRead - marker - 2/* crlf */,
-										enc));
+								result.put(name,
+										ss = new String(buffer, marker, contentRead - marker - 2/* crlf */, enc));
 								// System.err.println("====PUT(" + name + "," +
 								// ss + ")");
 							}
