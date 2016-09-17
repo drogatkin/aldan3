@@ -1192,15 +1192,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			contentType = contentType.toLowerCase();
 		else
 			return null;
-		int cp = contentType.indexOf("charset=");
-		if (cp < 0)
-			return null;
-		String charset = contentType.substring(cp + "charset=".length()).trim();
-		cp = charset.indexOf(';');
-		if (cp > 0)
-			charset = charset.substring(0, cp);
-
-		return DataConv.unquote(charset);
+		return req.getCharacterEncoding();
 	}
 
 	/**
@@ -1490,8 +1482,10 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			throw new IOException("Input stream is unaccessible");
 		}
 		int bp = contentType.indexOf(Constant.HTTP.BOUNDARY_EQ);
-		if (bp < 0)
+		if (bp < 0) {
+			log("No boundary found for multipart form data %s", null, contentType);
 			return null;
+		}
 		String boundary = contentType.substring(bp + Constant.HTTP.BOUNDARY_EQ.length()); // it
 		// can be not last attribute
 		int boundaryLength = boundary.length();
