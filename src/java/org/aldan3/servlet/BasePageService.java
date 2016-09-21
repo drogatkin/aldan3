@@ -206,6 +206,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				return;
 			} else if (submit) {
 				Object controlData = applySideEffects(doControl());
+				// TODO isMobileApp
 				if (controlData == null) { // the form is Ok
 					redirect(req, resp, getSubmitPage());
 				} else {// TODO getErrorView() can be here too
