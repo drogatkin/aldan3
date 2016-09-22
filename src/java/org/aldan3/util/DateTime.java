@@ -48,7 +48,7 @@ public class DateTime {
 		if (date == null)
 			return "";
 		if (fmtr == null)
-			if (Env.getJavaVersion() > 7)
+			if (Env.getJavaVersion() > 7 && false)
 				fmtr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX", Locale.ENGLISH);
 			else
 				fmtr = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ", Locale.ENGLISH);

@@ -927,6 +927,14 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 										}
 										f.set(model, ca);
 									}
+								} else if (compType == byte.class) {
+									if(va.length == 1 && multiFormData != null) {
+										if (va[0] instanceof byte[])
+											f.set(model, va[0]);
+										else if (va[0] instanceof File) {
+											
+										}
+									}
 								} else
 									log("Unsupported type for auto conversion %s of %s", null, compType, f.getName());
 							} catch (Exception e) {
@@ -1024,6 +1032,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 										} else if (fieldClass == char.class) {
 											f.set(model, new Character(v.charAt(0)));
 										} else if (fieldClass == File.class) {
+											
 											log("Supporting file is coming soon...", null);
 										} else if (fieldClass.isEnum()) {
 											f.set(model, fieldClass.getMethod("valueOf", String.class).invoke(null, v));
