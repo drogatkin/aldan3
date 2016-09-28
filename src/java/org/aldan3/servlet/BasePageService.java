@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -53,6 +54,7 @@ import org.aldan3.model.ProcessException;
 import org.aldan3.model.TemplateProcessor;
 import org.aldan3.util.ArrayEntryMap;
 import org.aldan3.util.DataConv;
+import org.aldan3.util.DateTime;
 import org.aldan3.util.ResourceException;
 import org.aldan3.util.ResourceManager;
 import org.aldan3.util.Stream;
@@ -1007,8 +1009,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 								log("Problem in setting field %s", e, f.getName());
 							}
 						else {
-							log("A converter can be needed for %s of %s (%s %s)", null, f.getType(), f.getName(),
-									fieldClass, v);
+							log("A converter can be needed for %s of %s (%s %s) - %s", null, f.getType(), f.getName(),
+									fieldClass, v, convertor);
 							if (convertor != null) {
 								try {
 									f.set(model, convertor.convert(v, getTimeZone(), getLocale()));
@@ -1034,6 +1036,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 										} else if (fieldClass == File.class) {
 											
 											log("Supporting file is coming soon...", null);
+										} else if (fieldClass == Date.class) {
+											f.set(model, DateTime.parseJsonDate(v, null));
 										} else if (fieldClass.isEnum()) {
 											f.set(model, fieldClass.getMethod("valueOf", String.class).invoke(null, v));
 										} else
@@ -1048,7 +1052,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 										else if (fieldClass.isEnum())
 											f.set(model, null);
 										else
-											f.set(model, 0);
+											f.set(model, null);
 									}
 								} catch (Exception e) {
 									log("Problem in converting to %s of %s for field %s", e, fieldClass, v,

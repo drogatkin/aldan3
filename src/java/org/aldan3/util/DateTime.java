@@ -6,6 +6,7 @@
  */
 package org.aldan3.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -42,6 +43,15 @@ public class DateTime {
 
 	public static String dateToJson(Date date) {
 		return dateToJson(date, null);
+	}
+	
+	public static Date parseJsonDate(String jsdate, Date defDate) {
+		try {
+			return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZZZ", Locale.ENGLISH).parse(jsdate);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return defDate;
+		}
 	}
 
 	public static String dateToJson(Date date, SimpleDateFormat fmtr) {
