@@ -1008,16 +1008,16 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 							} catch (Exception e) {
 								log("Problem in setting field %s", e, f.getName());
 							}
-						else {
-							log("A converter can be needed for %s of %s (%s %s) - %s", null, f.getType(), f.getName(),
-									fieldClass, v, convertor);
-							if (convertor != null) {
+						else {							
+							if (convertor != null) {								
 								try {
 									f.set(model, convertor.convert(v, getTimeZone(), getLocale()));
 								} catch (Exception e) {
 									log("Problem in setting or converting field %s", e, f.getName());
 								}
 							} else {
+								log("A converter can be needed for %s of %s (%s %s)", null, f.getType(), f.getName(),
+										fieldClass, v);
 								// if (fieldClass.isPrimitive()) {
 								try {
 									if (v.length() > 0) {
@@ -1051,6 +1051,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 											f.set(model, null);
 										else if (fieldClass.isEnum())
 											f.set(model, null);
+										else if (fieldClass.isAssignableFrom(Number.class) || fieldClass == int.class || fieldClass == long.class)
+											f.set(model, 0);
 										else
 											f.set(model, null);
 									}
