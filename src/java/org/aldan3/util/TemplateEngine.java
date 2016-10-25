@@ -1728,12 +1728,12 @@ public class TemplateEngine implements TemplateProcessor {
 						} catch (Exception e) {
 							if (e instanceof InvocationTargetException) {
 								log(Log.ERROR, "An exception in calling the method "
-										+ new String(_buf, _dp + 1, _ne - _dp - 1) + " of " + _o + "/" + _o.getClass(),
+										+ new String(_buf, _dp + 1, _ne - _dp - 1) + " of " + _o + "/" + (_o == null?"NULL":_o.getClass()),
 										((InvocationTargetException) e).getTargetException());
 								vv = new VarValue(((InvocationTargetException) e).getTargetException(), null);
 							} else {
 								log(Log.ERROR, "Can't call method '" + new String(_buf, _dp + 1, _ne - _dp - 1) + "' of "
-										+ _o + " as " + _o.getClass()+" with "+Arrays.toString(pvs) + " of "+Arrays.toString(pcs), e);
+										+ _o + " as " + (_o == null?"NULL":_o.getClass()) + " with "+Arrays.toString(pvs) + " of "+Arrays.toString(pcs), e);
 								vv = new VarValue(e, null);
 							}
 						}
