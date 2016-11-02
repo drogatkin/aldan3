@@ -6,8 +6,10 @@
  */
 package org.aldan3.util;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -112,6 +114,30 @@ public class DataConv {
 			result.append(array[i] == null ? "null" : array[i].toString());
 			if (i < array.length - 1)
 				result.append(_div);
+		}
+		return result.toString();
+	}
+	
+	/** Converts a collection to a string with separators
+	 * 
+	 * @param _collection
+	 * @param _div separtor
+	 * @param _null value used for null values, default "null"
+	 * @return
+	 */
+	public static <C extends Collection<?>> String collectionToString(C _collection, String _div, String _null) {
+		if (_collection == null)
+			return "null";
+        if (_null == null)
+        	_null = "null";
+		StringBuffer result = new StringBuffer((_collection.size() + 1) * 50);
+		int c = 0;
+		for (Iterator<?> i = _collection.iterator(); i.hasNext();) {
+			Object obj = i.next();
+			result.append(obj == null ? _null : obj.toString());
+			if (c < _collection.size() - 1)
+				result.append(_div);
+			c++;
 		}
 		return result.toString();
 	}
