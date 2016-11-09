@@ -212,12 +212,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				if (controlData == null) { // the form is Ok
 					redirect(req, resp, getSubmitPage());
 				} else {// TODO getErrorView() can be here too
-					if (noTemplate() && controlData instanceof Map == false) {
-						setContentType("", null);
-						w = resp.getWriter();
-						w.write(controlData.toString());
-					} else
-						w = processView(controlData, getViewName(), ajax);
+					w = processView(controlData, getViewName(), ajax);
 				}
 				return;
 			}
@@ -328,6 +323,12 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			return null;
 		if (viewName == null)
 			throw new NullPointerException("View name is null");
+		if (noTemplate() && modelData instanceof Map == false) {
+				setContentType("", null);
+				PrintWriter result = resp.getWriter();
+				result.write(modelData.toString());
+				return result;
+		}
 		// TODO provide a canvas way for ajax calls
 		String canvas = ajaxView ? null : getCanvasView();
 		if (canvas != null && included == false) {
@@ -351,7 +352,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		if (tp != null) {
 			if (resp.isCommitted())
 				throw new ServletException(
-						"Can't process view, since write operation was initiated. (" + req.getRequestURI());
+						"Can't process view, since write operation was committed. <" + req.getRequestURI()+">");
 			try {
 				TemplateEngine.CurrentRequest.setRequest(req);
 				setContentType(viewName, null);
@@ -411,6 +412,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 * @return content type, or null then default "text/html" is used
 	 */
 	protected String getContentType(String viewName) {
+		if (noTemplate())
+			return "application/json";
 		return null;
 	}
 
