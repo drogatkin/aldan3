@@ -120,7 +120,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		start();
 		if (isAllowed(isPublic()) == false) {
 			if (ajax)
-				this.resp.sendError(HttpServletResponse.SC_FORBIDDEN, "Not allowed or expired");
+				this.resp.sendError(getNoAccessResponseCode(), "Not allowed or expired");
 			else
 				redirect(this.req, this.resp, getUnauthorizedPage());
 			return;
@@ -220,24 +220,21 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		} catch (Throwable t) {
 			if (t instanceof ThreadDeath)
 				throw (ThreadDeath) t;
+			resp.setStatus(getErrorResponseCode());
+			log("Unexpected error",	t);
 			String errorView = getErrorView();
 			if (errorView != null) {
 				// an exception can be invisible in Ajax call so duplicate it in
 				// log
-				if (resp.isCommitted())
-					log("Unexpected error in the service call processing, can't report in page since result is committed",
-							t);
-				else if (ajax) {
-					resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-					log("Unexpected error in Ajax call processing", t);
-				} else
+				if (!resp.isCommitted())
 					try {
-						resp.reset();
+						resp.reset();						
 						w = processView(getErrorInfo(t), errorView, true);
 					} catch (Exception /*Throwable*/ e) {
-						log("Unexpected error in the service call processing, can't report in page since problem in reporting "
-								+ e, t);
+						log("The error above hasn't been reported becasue", e);
 					}
+				else
+					log("The error above hasn't been reported becasue result is committed", null);
 			} else {
 				if (t instanceof IOException)
 					throw (IOException) t;
@@ -251,6 +248,22 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			}
 			finish();
 		}
+	}
+
+	/** response code for unhandled errors
+	 * 
+	 * @return
+	 */
+	protected int getErrorResponseCode() {
+		return HttpServletResponse.SC_INTERNAL_SERVER_ERROR;
+	}
+
+	/** response code when access is prohibited
+	 * 
+	 * @return
+	 */
+	protected int getNoAccessResponseCode() {
+		return HttpServletResponse.SC_FORBIDDEN;
 	}
 
 	public void reset() {
@@ -508,6 +521,10 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 * @return
 	 */
 	protected String getErrorView() {
+		if (isAjax(req.getPathInfo()) || noTemplate()) {
+			setContentType(null, "application/json");
+			return "unexpectederror-json.htm";
+		}
 		return "unexpectederror.htm";
 	}
 
@@ -1240,7 +1257,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 * call
 	 * 
 	 * @param pathInfo
-	 * @return true if a request can be categorized by Ajax by aby criteria
+	 * @return true if a request can be categorized by Ajax by criteria
 	 */
 	protected boolean isAjax(String pathInfo) {
 		return pathInfo != null && pathInfo.startsWith("/ajax");
