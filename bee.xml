@@ -207,6 +207,9 @@
        <parameter value="-C"/>
        <parameter value="&source_directory;"/>
        <parameter>&domain;/&project;/resource/unexpectederror.htm</parameter>
+       <parameter value="-C"/>
+       <parameter value="&source_directory;"/>
+       <parameter>&domain;/&project;/resource/unexpectederror-json.htm</parameter>
       <onexception>
 	<block>
                  <echo>Exception at jarring</echo>

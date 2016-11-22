@@ -127,7 +127,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		}
 
 		// TODO make submit condition customizable - isSubmit()
-		boolean submit = "PUT".equals(req.getMethod()) == false && DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
+		String method = req.getMethod();
+		boolean submit = "PUT".equals(method) == false && "DELETE".equals(method) == false && DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
 				getStringParameterValue(Constant.Form.SUBMIT_X, null, 0), 0));
 		if (forwarded) {
 			String query = req.getQueryString();
@@ -146,7 +147,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				}
 			}
 		}
-		if (submit && isAllowedGet() == false && "POST".equals(req.getMethod()) == false) {
+		if (submit && isAllowedGet() == false && "POST".equals(method) == false) {
 			resp.sendError(HttpServletResponse.SC_METHOD_NOT_ALLOWED);
 			return;
 		}
@@ -221,15 +222,15 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			if (t instanceof ThreadDeath)
 				throw (ThreadDeath) t;
 			resp.setStatus(getErrorResponseCode());
-			log("Unexpected error",	t);
 			String errorView = getErrorView();
+            log("Unexpected error: "+t+", reported to "+errorView,	t);
 			if (errorView != null) {
 				// an exception can be invisible in Ajax call so duplicate it in
 				// log
 				if (!resp.isCommitted())
 					try {
 						resp.reset();						
-						w = processView(getErrorInfo(t), errorView, true);
+						w = processView(getErrorInfo(t), errorView, ajax);
 					} catch (Exception /*Throwable*/ e) {
 						log("The error above hasn't been reported becasue", e);
 					}
@@ -363,7 +364,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		addEnv(modelData, ajaxView);
 		TemplateProcessor tp = getTemplateProcessor(viewName);
 		if (tp != null) {
-			if (resp.isCommitted())
+			if (resp.isCommitted())  // TODO already check and possibly masks an actual problem
 				throw new ServletException(
 						"Can't process view, since write operation was committed. <" + req.getRequestURI()+">");
 			try {
@@ -371,6 +372,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				setContentType(viewName, null);
 				PrintWriter result = resp.getWriter();
 				tp.process(result, viewName, modelData, getProperties(), getLocale(), getTimeZone());
+				//log("tmplate processed :"+modelData+" "+viewName, null);
 				return result;
 			} catch (ProcessException e) {
 				throw new ServletException(e);
