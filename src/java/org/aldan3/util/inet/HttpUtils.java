@@ -259,10 +259,10 @@ public class HttpUtils {
 		for (int i = 0; i < s.length; i++) {
 			switch (s[i]) {
 			case '"':
-				toReturn.append("\\" + "x22");
+				toReturn.append("\\" + "u0022");
 				break;
 			case '\'':
-				toReturn.append("\\" + "x27");
+				toReturn.append("\\" + "u0027");
 				break;
 			case '\b':
 				toReturn.append("\\" + "b");
@@ -287,7 +287,11 @@ public class HttpUtils {
 			//				break;
 			default:
 				// TODO if (s[i] > 127)  toReturn.append("\\x").append(tohex
-				toReturn.append(String.valueOf(s[i]));
+				if (s[i] < 0x20) {				
+					toReturn.append("\\u");
+					toReturn.append(Integer.toHexString((int) s[i]));
+				} else
+					toReturn.append(String.valueOf(s[i]));
 			}
 		}
 		return toReturn.toString();
