@@ -1075,6 +1075,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 											f.set(model, null);
 										else if (fieldClass.isAssignableFrom(Number.class) || fieldClass == int.class || fieldClass == long.class)
 											f.set(model, 0);
+										else if (fieldClass == float.class || fieldClass == double.class)
+											f.set(model, 0.0);
 										else
 											f.set(model, null);
 									}
