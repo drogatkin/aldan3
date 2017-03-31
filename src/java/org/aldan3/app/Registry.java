@@ -54,11 +54,11 @@ public class Registry {
 		}
 	}
 
-	public ServiceProvider unregister(ServiceProvider sp) {
+	public <SP extends ServiceProvider> SP unregister(SP sp) {
 		try {
 			rwl.writeLock().lock();
 			if (services.get(sp.getPreferredServiceName()) != null)
-				return services.remove(sp.getPreferredServiceName());
+				return (SP)services.remove(sp.getPreferredServiceName());
 		} finally {
 			rwl.writeLock().unlock();
 		}
