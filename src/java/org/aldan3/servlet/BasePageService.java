@@ -81,6 +81,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	protected PropertyResourceBundle textResource;
 
 	protected ArrayEntryMap multiFormData;
+	 
+	private final HashMap <String, ?> EMPTYMAP = new HashMap<String, Object>();
 
 	protected static final Random UNIQUE_GEN = new Random(System.currentTimeMillis());
 
@@ -333,8 +335,13 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 */
 	protected PrintWriter processView(Object modelData, String viewName, boolean ajaxView)
 			throws IOException, ServletException {
-		if (modelData == null)
-			return null;
+		if (modelData == null) {
+			if (ajaxView)
+				modelData = EMPTYMAP;
+			else
+				return null;
+		}
+			
 		if (viewName == null)
 			throw new NullPointerException("View name is null");
 		if (noTemplate() && modelData instanceof Map == false) {
