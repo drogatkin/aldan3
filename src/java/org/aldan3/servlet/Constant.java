@@ -105,6 +105,8 @@ public interface Constant {
 		public static final String SUBMIT = "submit";
 
 		public static final String SUBMIT_X = "submit.x";
+		
+		public static final String BACKGROUND = "$$background";
 	}
 
 	public static interface Variable {
