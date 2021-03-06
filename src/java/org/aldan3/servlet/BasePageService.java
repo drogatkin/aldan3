@@ -115,9 +115,9 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			charSet = Constant.CharSet.ASCII;
 		this.req.setCharacterEncoding(charSet);
 		multiFormData = fillMultipartData(req, resp); // TODO store as request attribute?
+		start();
 		String pi = this.req.getPathInfo();
 		boolean ajax = isAjax(pi);
-		start();
 		if (isAllowed(isPublic()) == false) {
 			if (ajax)
 				this.resp.sendError(getNoAccessResponseCode(), "Not allowed or expired");
@@ -210,7 +210,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			} else if (submit) {
 				Object controlData = applySideEffects(doControl());
 				// TODO isMobileApp
-				if (controlData == null) { // the form is Ok
+				if (controlData == null && !ajax) { // the form is Ok
 					redirect(req, resp, getSubmitPage());
 				} else {// TODO getErrorView() can be here too
 					w = processView(controlData, getViewName(), ajax);
