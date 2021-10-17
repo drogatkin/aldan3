@@ -82,7 +82,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 
 	protected ArrayEntryMap multiFormData;
 	 
-	private final HashMap <String, ?> EMPTYMAP = new HashMap<String, Object>();
+	protected final HashMap <String, ?> EMPTYMAP = new HashMap<String, Object>();
 
 	protected static final Random UNIQUE_GEN = new Random(System.currentTimeMillis());
 
@@ -343,7 +343,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		}
 			
 		if (viewName == null)
-			throw new NullPointerException("View name is null");
+			throw new NullPointerException("View name is not defined (null)");
 		if (noTemplate() && modelData instanceof Map == false) {
 				setContentType("", null);
 				PrintWriter result = resp.getWriter();
@@ -373,7 +373,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		if (tp != null) {
 			if (resp.isCommitted())  // TODO already check and possibly masks an actual problem
 				throw new ServletException(
-						"Can't process view, since write operation was committed. <" + req.getRequestURI()+">");
+						"Can't process the view, since write operation was committed. <" + req.getRequestURI()+">");
 			try {
 				TemplateEngine.CurrentRequest.setRequest(req);
 				setContentType(viewName, null);
