@@ -1205,7 +1205,11 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				}
 			if (path.length() > 0 && path.charAt(0) == '/')
 				resp.sendRedirect(encodeCRLF(path));
-			else
+			else if (req.getAttribute(Constant.Request.ATTR_USE_HASH) != null) {
+				resp.setContentType("text/plain");
+				PrintWriter result = resp.getWriter();
+				result.write(path);
+			} else
 				resp.sendRedirect(req.getContextPath() + req.getServletPath() + '/' + encodeCRLF(path));
 		}
 	}

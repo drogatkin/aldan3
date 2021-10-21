@@ -29,6 +29,8 @@ public interface Constant {
 
 	public static interface Request {
 		public static final String ATTR_USE_FORWARD = "ATTR_USE_FORWARD";
+		
+		public static final String ATTR_USE_HASH = "ATTR_USE_HASH";
 
 		public static final String INNER_VIEW = "INNER_VIEW";
 		
