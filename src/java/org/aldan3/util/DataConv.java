@@ -413,4 +413,8 @@ public class DataConv {
 			s = s.substring(0, s.length() - 1);
 		return s;
 	}
+	
+	public static int javaVersion() {
+		return toIntWithDefault(System.getProperty("java.version"), 1);
+	}
 }

@@ -1565,8 +1565,9 @@ public class TemplateEngine implements TemplateProcessor {
 	 * @exception return
 	 *                will contain exception if happened
 	 */
-	protected VarValue processMethodCall(char[] _buf, int _offset, int _ns, int _dp, int _ne, Map _definitions,
+	protected VarValue processMethodCall(char[] _buf, int _offset, int _ns, int _dp, int _ne, /*int _castEn,*/ Map _definitions,
 			HttpSession _session, Object _o, Locale _locale, TimeZone _timezone) {
+		// TODO add cast to a particular class/interface at a method call, for example @java.nio.file.Path^path.getFileName*()*@
 		// TODO add properties to figure parameters too
 		List callParams = new ArrayList();
 		int cp = _offset;
@@ -1723,7 +1724,10 @@ public class TemplateEngine implements TemplateProcessor {
 								m = _o.getClass()
 										.getMethod(new String(_buf, _dp + 1, _ne - _dp - 1), pcs);
 							}
-							m.setAccessible(true);
+							if (DataConv.javaVersion() > 10)
+								m.trySetAccessible();
+							else
+								m.setAccessible(true); 
 							vv = new VarValue(m.invoke(_o, pvs), castClass);
 						} catch (Exception e) {
 							if (e instanceof InvocationTargetException) {
