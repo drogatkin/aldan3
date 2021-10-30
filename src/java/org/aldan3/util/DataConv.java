@@ -415,6 +415,6 @@ public class DataConv {
 	}
 	
 	public static int javaVersion() {
-		return toIntWithDefault(System.getProperty("java.version"), 1);
+		return toIntWithDefault(System.getProperty("java.specification.version"), 1);
 	}
 }

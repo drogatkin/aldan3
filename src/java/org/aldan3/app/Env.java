@@ -32,7 +32,7 @@ public class Env {
 		} catch(Exception e) {
 			
 		}
-		String jvs = System.getProperty("java.version");
+		String jvs = System.getProperty("java.specification.version"); 
 		if (jvs.startsWith("1.")) {
 			int nd=jvs.indexOf('.', 2);
 			if (nd > 1) {
@@ -41,6 +41,12 @@ public class Env {
 				} catch(Exception e) {
 					
 				}
+			}
+		} else {
+			try {
+				JAVA_VESRION =Integer.parseInt(jvs);
+			} catch(Exception e) {
+				
 			}
 		}
 	}
