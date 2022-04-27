@@ -73,17 +73,22 @@ public class BasicAuthFilter implements Filter {
 
 	private void readExtConfig(ServletContext sctx) {
 		Properties authInfo = new Properties();
+		FileInputStream propertyStream = null;
 		try {
-			FileInputStream propertyStream;
 			authInfo.load(propertyStream = new FileInputStream(
 					getAuthPropertiesFile(sctx.getContextPath())));
-			propertyStream.close();
 			user = authInfo.getProperty("USER");
 			password = authInfo.getProperty("PASSWORD");
 			realm = authInfo.getProperty("REALM");
 		} catch (IOException e) {
 			sctx.log("No user specified as parameter and no credentials file",
 					e);
+		} finally {
+			try {
+				propertyStream.close();
+			} catch(Exception e) {
+				
+			}
 		}
 		if (user == null)
 			user = "admin";

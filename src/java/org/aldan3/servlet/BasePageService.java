@@ -292,6 +292,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			if ("HTTP/1.1".equals(req.getProtocol())) {
 				resp.setHeader("Cache-Control", "no-cache");
 				resp.addHeader("Cache-Control", "no-store"); // for Firefox 1.5
+				resp.addHeader("Cache-Control", "must-revalidate");
 			} else {
 				resp.setHeader("Pragma", "no-cache");
 				resp.setIntHeader("Expires", -1);
