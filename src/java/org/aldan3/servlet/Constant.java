@@ -26,6 +26,8 @@ public interface Constant {
 	public static final String HOME_URL = "https://github.com/drogatkin/aldan3";
 
 	public static final String ATTR_DEF_TEMPLATE_PROC = "ATTR_DEF_TEMPLATE_PROC";
+	
+	public static final String ALDAN3_CONFIG = "org.aldan3.servlet.configuration";
 
 	public static interface Request {
 		public static final String ATTR_USE_FORWARD = "ATTR_USE_FORWARD";

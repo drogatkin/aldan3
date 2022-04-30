@@ -50,7 +50,7 @@ public class FrontController extends HttpServlet {
 
 	private String basePath;
 	
-	private HashSet<Closeable> resources;
+	private HashSet<Closeable> resources; // TODO move to context
 
 	public void init(ServletConfig _config) throws ServletException {
 		super.init(_config);
@@ -116,6 +116,7 @@ public class FrontController extends HttpServlet {
 				}
 			}
 		}
+		ctx.setAttribute(Constant.ALDAN3_CONFIG, result);
 		return result;
 	}
 
