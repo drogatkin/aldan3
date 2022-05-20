@@ -441,8 +441,11 @@ public class TemplateEngine implements TemplateProcessor {
 									pt = (String) getFieldValue(_buf, fp + 2, cp, ffdp, _definitions, _session);
 									if (pt == null)
 										pt = new String(_buf, fp + 2, cp - fp - 2);
-								} else
-									pt = new String(_buf, fp + 3, cp - fp - 3);
+								} else {
+									pt = new String(_buf, fp + 3, cp - fp - 3).replaceAll("\\\\@", "@");
+									//pt = pt.replaceAll("\\\\@", "@");
+								}
+								
 								// try pattern as var name first
 								try {
 									if (_buf[fp + 1] == 'F') {
@@ -496,6 +499,7 @@ public class TemplateEngine implements TemplateProcessor {
 						}
 					}
 					sp = cp + 1; // ??
+					fp = -1;
 					// after @
 				} else if (_buf[cp] == '(') { // @expression(...
 					// TODO keep just varname buffer position constraints for easy discovering late
@@ -547,7 +551,8 @@ public class TemplateEngine implements TemplateProcessor {
 					st = IN_INDEX;
 					index = 0;
 				} else if (_buf[cp] == '?') {
-					fp = cp;
+					if (fp < 0) // only first
+						fp = cp;
 				} else if (_buf[cp] == '.') {
 					if (fp < 0)
 						nep = cp; // name end position, last dot before format
@@ -556,7 +561,16 @@ public class TemplateEngine implements TemplateProcessor {
 				} else if (_buf[cp] == '*' && nep > sp) { // name.method*parameters
 					//if (nep > 0)
 					st = IN_WAIT_FOR_CALL_ST;
+				} else if (_buf[cp] == '\\') { 
+					if (fp > 0) { 
+						stateStack.pushState(st);
+						st = PROCESS_ESC;
+					}
 				}
+				break;
+			case PROCESS_ESC: // TODO consider an approach to push current state in stack and pop it back
+				// check \@ in format string
+				st = stateStack.popState();
 				break;
 			case IN_ARG:
 				if (_buf[cp] == ')') {// suspect @expression(..)...
@@ -577,6 +591,9 @@ public class TemplateEngine implements TemplateProcessor {
 				} else if (_buf[cp] == '{') {
 					st = IN_ARG_SWITCH;
 					sn = 1;
+				} else if (_buf[cp] == '\\') {
+					stateStack.pushState(st);
+					st = PROCESS_ESC;
 				}
 				break;
 			case IN_RANGE_ARG:
@@ -644,6 +661,11 @@ public class TemplateEngine implements TemplateProcessor {
 				} else if (_buf[cp] == '?') {
 					fp = cp;
 					st = IN_FRMT_CL_ARG;
+				} else if (_buf[cp] == '\\') {
+					if(fp > 0) {
+						stateStack.pushState(st);
+						st = PROCESS_ESC;
+					}
 				} else {
 					st = st == IN_FRMT_CL_ARG ? IN_FRMT_CL_ARG : IN_MET_ARG;
 				}
@@ -1996,6 +2018,8 @@ public class TemplateEngine implements TemplateProcessor {
 	private static final int IN_WAIT_FOR_ARG_PAR_DX = 67;
 
 	private static final int IN_FRMT_CL_ARG = 68;
+	
+	private static final int  PROCESS_ESC = 69;
 
 	protected static final String STATE_ABREV[] = { "IN_TEXT", "AT_AT", "IN_VAR", "IN_ARG", "AT_END_ARG", "IN_INDEX",
 			"IN_TRANSITION", "IN_ARG_IN_VAR", "IN_TO_ENDINDEX", "IN_TO_ENDINDEX_TRANS", "IN_ENDINDEX", "IN_STEP",
@@ -2011,7 +2035,7 @@ public class TemplateEngine implements TemplateProcessor {
 			"IN_MET_ARG_INNER_VAR", "IN_MET_ARG_INNER_VAR_BEG", "IN_VAR_VAL_CALC", "IN_ARG_IN_CALL_CASE",
 			"IN_EXPECT_NEXT_CALL_OR_CL_ST", "IN_CASE_VAR_IN_CALL_CASE", "IN_CASE_VAR_BYPASS_CALL_ARG",
 			"IN_WAIT_FOR_ARG_PAR_ENDX", "IN_RANGE_ARG", "IN_RANGE_ARG_VAR", "IN_RANGE_ARG_VAR_CALL",
-			"IN_WAIT_FOR_ARG_PAR_DX", "IN_FRMT_CL_ARG" };
+			"IN_WAIT_FOR_ARG_PAR_DX", "IN_FRMT_CL_ARG", "PROCESS_ESC" };
 
 	protected void debug(String msg) {
 		log(Log.DEBUG, msg, null);
