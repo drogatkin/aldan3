@@ -1746,9 +1746,14 @@ public class TemplateEngine implements TemplateProcessor {
 								m = _o.getClass()
 										.getMethod(new String(_buf, _dp + 1, _ne - _dp - 1), pcs);
 							}
-							if (DataConv.javaVersion() > 10)
-								m.trySetAccessible();
-							else
+							if (DataConv.javaVersion() > 10) {
+								// m.trySetAccessible();
+								try {
+									m.getClass().getMethod("trySetAccessible").invoke(m);
+								} catch(Exception e) {
+									log(Log.ERROR, "Can't make \"trySetAccessible\"", e);
+								}
+							} else
 								m.setAccessible(true); 
 							vv = new VarValue(m.invoke(_o, pvs), castClass);
 						} catch (Exception e) {

@@ -44,10 +44,10 @@ public class Registry {
 	public <SP extends ServiceProvider> SP register(SP sp) {
 		try {
 			rwl.writeLock().lock();
-			if (services.get(sp.getPreferredServiceName()) == null)
-				services.put(sp.getPreferredServiceName(), sp);
-			//else
-				//throw new RegistryException("Service is already registered");
+			ServiceProvider prev_sp = services.put(sp.getPreferredServiceName(), sp);
+			if (prev_sp != null) {
+				// message - service replased with new one
+			}
 			return (SP)sp;
 		} finally {
 			rwl.writeLock().unlock();

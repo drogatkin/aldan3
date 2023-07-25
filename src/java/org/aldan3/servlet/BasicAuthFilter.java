@@ -39,8 +39,11 @@ public class BasicAuthFilter implements Filter {
 		HttpServletRequest hreq = (HttpServletRequest) req;
 		String credentials = hreq.getHeader("Authorization");
 		if (credentials != null) {
-			if (req.getServletContext().getAttribute(REQUPDATE_ATTR_NAME) != null)
+			if (((HttpServletRequest)req).getSession(false) != null && ((HttpServletRequest)req).getSession(false).getAttribute(REQUPDATE_ATTR_NAME) != null ||
+					req.getServletContext().getAttribute(REQUPDATE_ATTR_NAME) != null) {
 				readExtConfig(req.getServletContext());
+				req.getServletContext().removeAttribute(REQUPDATE_ATTR_NAME);
+			}
 			credentials = Base64Codecs.base64Decode(
 					credentials.substring(credentials.indexOf(' ') + 1),
 					Base64Codecs.UTF_8);
