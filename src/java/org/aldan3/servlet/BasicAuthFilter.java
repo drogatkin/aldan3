@@ -39,8 +39,11 @@ public class BasicAuthFilter implements Filter {
 		HttpServletRequest hreq = (HttpServletRequest) req;
 		String credentials = hreq.getHeader("Authorization");
 		if (credentials != null) {
-			if (((HttpServletRequest)req).getSession(false) != null && ((HttpServletRequest)req).getSession(false).getAttribute(REQUPDATE_ATTR_NAME) != null ||
-					req.getServletContext().getAttribute(REQUPDATE_ATTR_NAME) != null) {
+			// other user can still use old credentials until the changer did't try to visit any protected page
+			if (((HttpServletRequest)req).getSession(false) != null && ((HttpServletRequest)req).getSession().getAttribute(REQUPDATE_ATTR_NAME) != null) {
+				readExtConfig(req.getServletContext());
+				((HttpServletRequest)req).getSession().removeAttribute(REQUPDATE_ATTR_NAME);
+			} else if (req.getServletContext().getAttribute(REQUPDATE_ATTR_NAME) != null) {	
 				readExtConfig(req.getServletContext());
 				req.getServletContext().removeAttribute(REQUPDATE_ATTR_NAME);
 			}

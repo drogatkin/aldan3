@@ -7,6 +7,7 @@
 package org.aldan3.servlet;
 
 public interface Constant {
+	// TODO potentially move to util package
 	/**
 	 * servlet config parameter name
 	 * 
@@ -15,11 +16,11 @@ public interface Constant {
 
 	public final static String PRODUCT_NAME = "Aldan 3 full Java tech stack";
 
-	public final static int VERSION_MJ = 1;
+	public final static int VERSION_MJ = 2;
 
-	public final static int VERSION_MN = 2;
+	public final static int VERSION_MN = 16;
 
-	public final static String BUILD = "38";
+	public final static String BUILD = "39";
 
 	public static final String COPYRIGHT = "Dmitriy Rogatkin";
 
