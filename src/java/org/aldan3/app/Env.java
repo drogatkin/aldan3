@@ -11,7 +11,7 @@ public class Env {
 	
 	private static int ANDROID_JDK_LEVEL = -1;
 	
-	private static int JAVA_VESRION = 4;
+	private static int JAVA_VESRION = 7;
 
 	public static final boolean isAndroid() {
 		return android;
