@@ -14,7 +14,7 @@
       ]>
 <!-- $Id: bee.xml$
    Aldan 3 project build script
-   Copyright (c) 2004-2015 Dmitriy Rogatkin    -->
+   Copyright (c) 2004-2023 Dmitriy Rogatkin    -->
 
 <bee name="&project;" type="project">
   &env;
@@ -107,7 +107,7 @@
        <parameter value="-classpath"/>
        <parameter variable="class path"/>
        <parameter value="-source"/>
-       <parameter value="1.6"/>
+       <parameter value="1.7"/>
        <parameter value="-target"/>
        <parameter variable="comp target"/>
        <parameter value="-d"/>

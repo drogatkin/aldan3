@@ -27,23 +27,26 @@ target clean {
 
 target dep_dir {
   dependency {
-     eq {
-        timestamp(${build_directory}${~separator~}.temp_repo)
-     }
+        eq {
+           timestamp(.temp_repo)
+        }
    }
-   display(Dir ${build_directory}${~separator~}.temp_repo -p)
+   display(Dir .temp_repo)
    exec mkdir (
         -p,
-        ${build_directory}${~separator~}.temp_repo
+        .temp_repo
    )
 }
 
 target load_dep {
-  dependency {
-    eq {
-        timestamp(servlet)
-     }
-   }
+     dependency {
+          target(dep_dir)
+      }
+    dependency {
+       eq {
+           timestamp(servlet)
+       }
+    }
    {
          servlet_api="javax.servlet:javax.servlet-api:4.0.1":rep-maven
          as_url(servlet_api)
