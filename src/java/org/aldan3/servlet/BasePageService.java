@@ -102,7 +102,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	 * <p>
 	 * A developer doesn't suppose to override the method.
 	 */
-	public void serve(HttpServletRequest req, HttpServletResponse resp, FrontController frotnController)
+	public final void serve(HttpServletRequest req, HttpServletResponse resp, FrontController frotnController)
 			throws IOException, ServletException {
 		this.req = req;
 		this.resp = resp;
@@ -337,9 +337,10 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	protected PrintWriter processView(Object modelData, String viewName, boolean ajaxView)
 			throws IOException, ServletException {
 		if (modelData == null) {
-			if (ajaxView)
+			if (ajaxView) {
+				EMPTYMAP.clear();
 				modelData = EMPTYMAP;
-			else
+			} else
 				return null;
 		}
 			
@@ -379,6 +380,8 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 				TemplateEngine.CurrentRequest.setRequest(req);
 				setContentType(viewName, null);
 				PrintWriter result = resp.getWriter();
+				//if (ajaxView)
+				//System.err.printf("Ret %s @ %s%n", modelData, viewName);
 				tp.process(result, viewName, modelData, getProperties(), getLocale(), getTimeZone());
 				//log("tmplate processed :"+modelData+" "+viewName, null);
 				return result;

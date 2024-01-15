@@ -1,0 +1,108 @@
+# a build file Java project aldan3 
+
+project =aldan3
+ domain ="org"
+source_directory ="src/java"
+"build_directory" = ./build
+java_version=8
+
+servlet=.temp_repo/javax.servlet-api-4.0.1.jar
+aldan3 jdo=../aldan3-jdo/build/aldan3-jdo.jar
+
+doc_directory=doc
+build_file ="${project}.jar"
+ mobile= "y"
+resources ="${domain}.${project}.resources"
+manifestf =""
+main_class= "${domain}.${project}.Main"
+
+target clean {
+    dependency {true}
+    exec rm  (
+        -r,
+        ${build_directory}/${domain},
+        ${build_directory}/${build_file}
+    )
+}
+
+target dep_dir {
+  dependency {
+     eq {
+        timestamp(${build_directory}${~separator~}.temp_repo)
+     }
+   }
+   display(Dir ${build_directory}${~separator~}.temp_repo -p)
+   exec mkdir (
+        -p,
+        ${build_directory}${~separator~}.temp_repo
+   )
+}
+
+target load_dep {
+  dependency {
+    eq {
+        timestamp(servlet)
+     }
+   }
+   {
+         servlet_api="javax.servlet:javax.servlet-api:4.0.1":rep-maven
+         as_url(servlet_api)
+         exec wget (
+           ~~, 
+           -O,
+           servlet
+         )
+  }
+}
+
+target compile:. {
+   dependency {
+       or {
+              newerthan(${source_directory}/.java,${build_directory}/.class)
+       }
+   }
+   dependency {
+          target(load_dep)
+      }
+   {
+        display(Compiling Java src ... )
+       newerthan(${source_directory}/.java,${build_directory}/.class)
+       assign(main src,~~)
+       exec javac (
+         -source,
+         java_version,
+        -target,
+         java_version,
+         -d,
+         ${build_directory},
+        -cp,
+         ${build_directory}${~path_separator~}${servlet}${~path_separator~}${aldan3 jdo},
+         main src
+       )     
+      if {
+         neq(${~~}, 0)
+         then {
+            panic("Compilation error(s)")
+         }
+     }
+   }
+}
+
+target jar {
+      dependency {
+         anynewer(${build_directory}/${domain}/*,${build_directory}/${build_file})
+      }
+      dependency {
+          target(compile)
+      }
+     
+     {    display(Jarring ${build_file} ...)
+          exec jar (
+            -cf,
+            ${build_directory}/${build_file},
+            -C,
+            ${build_directory},
+            ${domain}
+          )
+     }
+}
