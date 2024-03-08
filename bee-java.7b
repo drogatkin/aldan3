@@ -1,10 +1,12 @@
-# a build file Java project aldan3 
+# Java project aldan3 - build script
 
 project =aldan3
  domain ="org"
 source_directory ="src/java"
 "build_directory" = ./build
 java_version=8
+
+include(./env.7b) 
 
 servlet=.temp_repo/javax.servlet-api-4.0.1.jar
 aldan3 jdo=../aldan3-jdo/build/aldan3-jdo.jar
@@ -15,6 +17,8 @@ build_file ="${project}.jar"
 resources ="${domain}.${project}.resources"
 manifestf =""
 main_class= "${domain}.${project}.Main"
+
+jnlp=${java_home}/jre/lib/javaws.jar
 
 target clean {
     dependency {true}
@@ -79,7 +83,7 @@ target compile:. {
          -d,
          ${build_directory},
         -cp,
-         ${build_directory}${~path_separator~}${servlet}${~path_separator~}${aldan3 jdo},
+         ${build_directory}${~path_separator~}${servlet}${~path_separator~}${aldan3 jdo}${~path_separator~}${jnlp},
          main src
        )     
       if {
