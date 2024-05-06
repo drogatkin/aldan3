@@ -159,24 +159,23 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			String methodName = null;
 			String npi = null;
 			if (ajax && pi != null) {
-				// find out method pref, and use
-				// processXXXCall(), and getXXXViewName()
-				int ns = "/ajax".length(), se, il = pi.length();
-				// TODO investigate if isAjax() isn't in sync with Ajax path pattern
-				methodName = getDefaultAjaxMethodName();
-				if (il > ns && methodName != null) {
-					if (pi.charAt(ns) == '/')
-						ns++;
-					if (il > ns) {
-						se = pi.indexOf('/', ns/*+1*/);
-						if (se > 0) {
-							methodName = pi.substring(ns, se);
-							if (se < il - 1)
-								npi = pi.substring(se + 1);
-						} else
-							methodName = pi.substring(ns);
-					}
-				}
+			    //System.err.printf("path info %s\n", pi);
+			    if (pi.startsWith("/ajax")) {
+			        // find out method pref, and use
+			    	// processXXXCall(), and getXXXViewName()
+    			    if (pi.equals("/ajax") || pi.equals("/ajax/") ) {
+    			        methodName = getDefaultAjaxMethodName();
+    			    } else {
+			             int ns = "/ajax/".length();
+			             pi = pi.substring(ns);
+			             int se = pi.indexOf('/');
+			             if (se > 0) {
+			                 npi = pi.substring(se);
+			                 methodName =  pi.substring(0, se);
+			             } else
+			                 methodName =  pi;
+			        }
+			    }
 			}
 			if (methodName != null) {
 				final String fnpi = npi;
