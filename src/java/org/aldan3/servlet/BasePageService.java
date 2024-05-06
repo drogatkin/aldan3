@@ -163,17 +163,23 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			    if (pi.startsWith("/ajax")) {
 			        // find out method pref, and use
 			    	// processXXXCall(), and getXXXViewName()
-    			    if (pi.equals("/ajax") || pi.equals("/ajax/") ) {
+			    	int pil = pi.length();
+			    	int ns = "/ajax".length();
+			    	if (pil == ns)
+			    	     methodName = getDefaultAjaxMethodName();
+    			    else if (pi.equals("/ajax/") ) {
     			        methodName = getDefaultAjaxMethodName();
-    			    } else {
-			             int ns = "/ajax/".length();
-			             pi = pi.substring(ns);
-			             int se = pi.indexOf('/');
+    			        npi = "/";
+    			    } else if (pi.charAt(ns) == '/') {
+			             npi = pi.substring(ns+1);
+			             int se = npi.indexOf('/');
 			             if (se > 0) {
-			                 npi = pi.substring(se);
-			                 methodName =  pi.substring(0, se);
-			             } else
-			                 methodName =  pi;
+			                 methodName =  npi.substring(0, se);
+			                 npi = npi.substring(se);
+			             } else {
+			                 methodName =  npi;
+			                 npi = null;
+			             }
 			        }
 			    }
 			}
@@ -199,8 +205,6 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 						w.write(respData.toString());
 					}
 				} catch (Throwable e) {
-					if (e instanceof ThreadDeath)
-						throw (ThreadDeath) e;
 					if (e instanceof InvocationTargetException)
 						e = ((InvocationTargetException) e).getCause();
 					log("Problem in Ajax call (%s).", e, getClass().getName());
