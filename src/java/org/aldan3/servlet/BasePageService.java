@@ -167,7 +167,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			    	int ns = "/ajax".length();
 			    	if (pil == ns)
 			    	     methodName = getDefaultAjaxMethodName();
-    			    else if (pi.equals("/ajax/") ) {
+    			    else if (pil == ns+1 && pi.charAt(ns) == '/') {
     			        methodName = getDefaultAjaxMethodName();
     			        npi = "/";
     			    } else if (pi.charAt(ns) == '/') {
