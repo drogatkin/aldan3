@@ -22,6 +22,8 @@ import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -316,6 +318,7 @@ public class TemplateEngine implements TemplateProcessor {
 		boolean wasExpanded = false;
 		StringBuffer buf = null;
 		SimpleDateFormat sdf = _locale == null ? new SimpleDateFormat() : new SimpleDateFormat("", _locale);
+		DateTimeFormatter dtf = null;
 		if (_timezone != null)
 			sdf.setTimeZone(_timezone);
 		// if (_offset > 0)
@@ -433,6 +436,7 @@ public class TemplateEngine implements TemplateProcessor {
 						} else {
 							if (fp > 0 && val.toString().length() > 0) { // process format string
 								Format f = null;
+								DateTimeFormatter fmtdt = null;
 								String pt = null;
 								if (_buf[fp + 2] != '\'') {
 									// System.err.println("Called for formatting
@@ -458,9 +462,12 @@ public class TemplateEngine implements TemplateProcessor {
 										val = sb;
 									} else {
 										if (_buf[fp + 1] == 'D') {
-											if (pt.length() > 0)
+											if (pt.length() > 0) {
 												sdf.applyPattern(pt);
+												dtf = DateTimeFormatter.ofPattern(pt);
+											}
 											f = sdf;
+											fmtdt = dtf;
 										} else {
 											if (val instanceof Number == false) {
 												if (val instanceof String)
@@ -481,7 +488,10 @@ public class TemplateEngine implements TemplateProcessor {
 											if (f != null && pt.length() > 0)
 												((DecimalFormat) f).applyLocalizedPattern(pt);
 										}
-										val = f.format(val);
+										if (val instanceof TemporalAccessor)
+											val = fmtdt.format((TemporalAccessor) val);
+										else
+											val = f.format(val);
 									}
 								} catch (Exception e) {
 									log(Log.ERROR, "An exception at an attempt to format using " + pt + " value '"
