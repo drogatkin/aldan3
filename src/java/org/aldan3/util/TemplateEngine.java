@@ -318,7 +318,6 @@ public class TemplateEngine implements TemplateProcessor {
 		boolean wasExpanded = false;
 		StringBuffer buf = null;
 		SimpleDateFormat sdf = _locale == null ? new SimpleDateFormat() : new SimpleDateFormat("", _locale);
-		DateTimeFormatter dtf = null;
 		if (_timezone != null)
 			sdf.setTimeZone(_timezone);
 		// if (_offset > 0)
@@ -464,10 +463,9 @@ public class TemplateEngine implements TemplateProcessor {
 										if (_buf[fp + 1] == 'D') {
 											if (pt.length() > 0) {
 												sdf.applyPattern(pt);
-												dtf = DateTimeFormatter.ofPattern(pt);
 											}
 											f = sdf;
-											fmtdt = dtf;
+											fmtdt = _locale == null ? DateTimeFormatter.ofPattern(pt) : DateTimeFormatter.ofPattern(pt, _locale);
 										} else {
 											if (val instanceof Number == false) {
 												if (val instanceof String)
