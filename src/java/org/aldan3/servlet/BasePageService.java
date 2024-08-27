@@ -1215,6 +1215,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			else if (req.getAttribute(Constant.Request.ATTR_USE_HASH) != null) {
 				resp.setContentType("text/plain");
 				PrintWriter result = resp.getWriter();
+				result.write('#');
 				result.write(path);
 			} else
 				resp.sendRedirect(req.getContextPath() + req.getServletPath() + '/' + encodeCRLF(path));
