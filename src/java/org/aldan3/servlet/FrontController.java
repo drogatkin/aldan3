@@ -349,8 +349,6 @@ public class FrontController extends HttpServlet {
 					}
 					return result;
 				} catch (Throwable e) {
-					if (e instanceof ThreadDeath)
-						throw (ThreadDeath) e;
 					log(ID + "Can't instantiate class '" + servicesPackage + _name + "'. Reason: " + e);
 					new Exception("TRACE").printStackTrace();
 				}

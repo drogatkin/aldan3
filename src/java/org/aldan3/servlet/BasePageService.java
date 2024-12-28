@@ -224,8 +224,6 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			}
 			w = processView(applySideEffects(getModel()), getViewName(), ajax);
 		} catch (Throwable t) {
-			if (t instanceof ThreadDeath)
-				throw (ThreadDeath) t;
 			resp.setStatus(getErrorResponseCode());
 			String errorView = getErrorView();
             log("Unexpected error: "+t+", reported to "+errorView,	t);

@@ -107,7 +107,7 @@
        <parameter value="-classpath"/>
        <parameter variable="class path"/>
        <parameter value="-source"/>
-       <parameter value="1.7"/>
+       <parameter value="8"/>
        <parameter value="-target"/>
        <parameter variable="comp target"/>
        <parameter value="-d"/>
@@ -175,7 +175,7 @@
            </function>
     </dependency>
 
-    <task name="jar_do" code="sun.tools.jar.Main">
+    <task name="jar_do" code="sun.tools.jar.Main" tool="jar">
        <parameter>
           <expression>
             <if>

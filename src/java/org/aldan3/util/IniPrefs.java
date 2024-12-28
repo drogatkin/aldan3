@@ -22,11 +22,6 @@ import java.util.StringTokenizer;
 import java.util.prefs.AbstractPreferences;
 import java.util.prefs.BackingStoreException;
 
-import javax.jnlp.BasicService;
-import javax.jnlp.FileContents;
-import javax.jnlp.PersistenceService;
-import javax.jnlp.ServiceManager;
-
 import org.aldan3.model.Log;
 import org.aldan3.model.ServiceProvider;
 
@@ -65,10 +60,6 @@ public class IniPrefs extends AbstractPreferences implements ServiceProvider
 	String programname;
 
 	String encoding;
-
-	PersistenceService ps;
-
-	BasicService bs;
 	
 	Log logger;
 
@@ -101,22 +92,6 @@ public class IniPrefs extends AbstractPreferences implements ServiceProvider
 		this.programname = name;
 		this.encoding = encoding;
 		inifolder = System.getProperty(name + HOMEDIRSUFX);
-		if (inifolder == null) {
-			Class use = null;
-			try {
-				use = Class.forName("javax.jnlp.UnavailableServiceException");
-			} catch (ClassNotFoundException cne) {
-			} catch (Error e) {
-			}
-			if (use != null)
-				try {
-					ps = (PersistenceService) ServiceManager.lookup("javax.jnlp.PersistenceService");
-					bs = (BasicService) ServiceManager.lookup("javax.jnlp.BasicService");
-				} catch (Exception e) {
-					if (use.isInstance(e))
-						ps = null;
-				}
-		}
 
 		if (inifolder == null)
 			inifolder = System.getProperty("user.home");
@@ -188,24 +163,6 @@ public class IniPrefs extends AbstractPreferences implements ServiceProvider
 				if (fr != null) {
 					fr.close();
 					isr = null;
-				}
-				if (ps != null) {
-					FileContents fc = null;
-					try {
-						for (int i = 0; i < 2; i++) {
-							URL url = new URL("file", inifolder, programname + INIEXT);
-							try {
-								fc = ps.get(url);
-								isr = new InputStreamReader(fc.getInputStream());
-								i = 2;
-							} catch (java.io.FileNotFoundException fne) {
-								ps.create(url, 1024 * 10);
-							}
-						}
-					} catch (Exception e) {
-						//
-					}
-
 				}
 				if (isr == null)
 					if (encoding == null)
@@ -315,23 +272,6 @@ public class IniPrefs extends AbstractPreferences implements ServiceProvider
 	public void save() {
 		try {
 			OutputStreamWriter osw = null;
-			if (ps != null) {
-				FileContents fc = null;
-				try {
-					for (int i = 0; i < 2; i++) {
-						URL url = new URL("file", inifolder, programname + INIEXT);
-						try {
-							fc = ps.get(url);
-							osw = new OutputStreamWriter(fc.getOutputStream(true));
-							i = 2;
-						} catch (java.io.FileNotFoundException fne) {
-							ps.create(url, 1024 * 10);
-						}
-					}
-				} catch (Exception e) {
-				}
-
-			}
 			if (osw == null)
 				if (encoding != null)
 					osw = new OutputStreamWriter(new FileOutputStream(new File(inifolder, programname + INIEXT)),
