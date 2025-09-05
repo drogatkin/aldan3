@@ -10,6 +10,7 @@ include(./env.7b)
 
 servlet=.temp_repo/javax.servlet-api-4.0.1.jar
 aldan3 jdo=../aldan3-jdo/build/aldan3-jdo.jar
+deps=${servlet}${~path_separator~}${aldan3 jdo}
 
 doc_directory=doc
 build_file ="${project}.jar"
@@ -18,16 +19,9 @@ resources ="${domain}.${project}.resources"
 manifestf =""
 main_class= "${domain}.${project}.Main"
 
-jnlp=${java_home}/jre/lib/javaws.jar
+test class=""
 
-target clean {
-    dependency {true}
-    exec rm  (
-        -r,
-        ${build_directory}/${domain},
-        ${build_directory}/${build_file}
-    )
-}
+comm =..${~/~}simscript${~/~}comm-java.7b:file
 
 target dep_dir {
   dependency {
@@ -42,74 +36,22 @@ target dep_dir {
    )
 }
 
-target load_dep {
-     dependency {
-          target(dep_dir)
-      }
+target load_libs {
+    dependency {
+        target(dep_dir)
+    }
     dependency {
        eq {
            timestamp(servlet)
        }
     }
-   {
-         servlet_api="javax.servlet:javax.servlet-api:4.0.1":rep-maven
-         as_url(servlet_api)
-         exec wget (
-           ~~, 
-           -O,
-           servlet
-         )
-  }
+    servlet_api="javax.servlet:javax.servlet-api:4.0.1":rep-maven
+    as_url(servlet_api)
+    exec wget (
+       ~~, 
+       -O,
+       servlet
+    )
 }
 
-target compile:. {
-   dependency {
-       or {
-              newerthan(${source_directory}/.java,${build_directory}/.class)
-       }
-   }
-   dependency {
-          target(load_dep)
-      }
-   {
-        display(Compiling Java src ... )
-       newerthan(${source_directory}/.java,${build_directory}/.class)
-       assign(main src,~~)
-       exec javac (
-         -source,
-         java_version,
-        -target,
-         java_version,
-         -d,
-         ${build_directory},
-        -cp,
-         ${build_directory}${~path_separator~}${servlet}${~path_separator~}${aldan3 jdo}${~path_separator~}${jnlp},
-         main src
-       )     
-      if {
-         neq(${~~}, 0)
-         then {
-            panic("Compilation error(s)")
-         }
-     }
-   }
-}
-
-target jar {
-      dependency {
-         anynewer(${build_directory}/${domain}/*,${build_directory}/${build_file})
-      }
-      dependency {
-          target(compile)
-      }
-     
-     {    display(Jarring ${build_file} ...)
-          exec jar (
-            -cf,
-            ${build_directory}/${build_file},
-            -C,
-            ${build_directory},
-            ${domain}
-          )
-     }
-}
+include(comm)
