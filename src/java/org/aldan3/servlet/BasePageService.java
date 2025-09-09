@@ -128,9 +128,9 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			return;
 		}
 
-		// TODO make submit condition customizable - isSubmit()
 		String method = req.getMethod();
 		if ("OPTIONS".equals(method)) {
+		    // TODO make the response customizable : origin and methods
 		    resp.setHeader("Access-Control-Allow-Origin","*");
 		    resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS");
 		    resp.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
@@ -139,6 +139,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 		    resp.setStatus(204);
 		    return;
 		}
+		// TODO make submit condition customizable - isSubmit()
 		boolean submit = "PUT".equals(method) == false && "DELETE".equals(method) == false && "OPTIONS".equals(method) == false && DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
 				getStringParameterValue(Constant.Form.SUBMIT_X, null, 0), 0));
 		if (forwarded) {
