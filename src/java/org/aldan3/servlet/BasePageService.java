@@ -97,7 +97,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	protected abstract String getUnauthorizedPage();
 
 	/**
-	 * This method provides core requests processing and called from front
+	 * This method provides core requests processing and called from the front
 	 * controller.
 	 * <p>
 	 * A developer doesn't suppose to override the method.
@@ -130,12 +130,18 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 
 		String method = req.getMethod();
 		if ("OPTIONS".equals(method)) {
-		    // TODO make the response customizable : origin and methods
-		    resp.setHeader("Access-Control-Allow-Origin","*");
-		    resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS");
-		    resp.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
-		    resp.setHeader("Access-Control-Max-Age", "86400");
-		    resp.setHeader("Vary", "Accept-Encoding, Origin");
+		    
+		    String corsCtrl = getProperties().getProperty("CORS_headers");
+		    if (corsCtrl == null) {
+    		    resp.setHeader("Access-Control-Allow-Origin","*");
+    		    resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+    		    resp.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
+    		    resp.setHeader("Access-Control-Max-Age", "86400");
+    		    resp.setHeader("Vary", "Accept-Encoding, Origin");
+		    } else {
+		        // TODO make the response customizable : origin and methods
+		        // split by ; and then headers split by : and set the headers
+		    }
 		    resp.setStatus(204);
 		    return;
 		}
