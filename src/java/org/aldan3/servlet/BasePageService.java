@@ -130,7 +130,16 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 
 		// TODO make submit condition customizable - isSubmit()
 		String method = req.getMethod();
-		boolean submit = "PUT".equals(method) == false && "DELETE".equals(method) == false && DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
+		if ("OPTIONS".equals(method)) {
+		    resp.setHeader("Access-Control-Allow-Origin","*");
+		    resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, OPTIONS");
+		    resp.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
+		    resp.setHeader("Access-Control-Max-Age", "86400");
+		    resp.setHeader("Vary", "Accept-Encoding, Origin");
+		    resp.setStatus(204);
+		    return;
+		}
+		boolean submit = "PUT".equals(method) == false && "DELETE".equals(method) == false && "OPTIONS".equals(method) == false && DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
 				getStringParameterValue(Constant.Form.SUBMIT_X, null, 0), 0));
 		if (forwarded) {
 			String query = req.getQueryString();
