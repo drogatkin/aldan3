@@ -97,7 +97,7 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 	protected abstract String getUnauthorizedPage();
 
 	/**
-	 * This method provides core requests processing and called from front
+	 * This method provides core requests processing and called from the front
 	 * controller.
 	 * <p>
 	 * A developer doesn't suppose to override the method.
@@ -128,9 +128,25 @@ public abstract class BasePageService implements PageService, ResourceManager.Lo
 			return;
 		}
 
-		// TODO make submit condition customizable - isSubmit()
 		String method = req.getMethod();
-		boolean submit = "PUT".equals(method) == false && "DELETE".equals(method) == false && DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
+		if ("OPTIONS".equals(method)) {
+		    
+		    String corsCtrl = getProperties().getProperty("CORS_headers");
+		    if (corsCtrl == null) {
+    		    resp.setHeader("Access-Control-Allow-Origin","*");
+    		    resp.setHeader("Access-Control-Allow-Methods", "POST, GET, PUT, DELETE, OPTIONS");
+    		    resp.setHeader("Access-Control-Allow-Headers", "X-PINGOTHER, Content-Type");
+    		    resp.setHeader("Access-Control-Max-Age", "86400");
+    		    resp.setHeader("Vary", "Accept-Encoding, Origin");
+		    } else {
+		        // TODO make the response customizable : origin and methods
+		        // split by ; and then headers split by : and set the headers
+		    }
+		    resp.setStatus(204);
+		    return;
+		}
+		// TODO make submit condition customizable - isSubmit()
+		boolean submit = "PUT".equals(method) == false && "DELETE".equals(method) == false && "OPTIONS".equals(method) == false && DataConv.hasValue(getStringParameterValue(Constant.Form.SUBMIT,
 				getStringParameterValue(Constant.Form.SUBMIT_X, null, 0), 0));
 		if (forwarded) {
 			String query = req.getQueryString();
